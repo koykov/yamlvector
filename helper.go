@@ -20,3 +20,8 @@ func (h Helper) Beautify(w io.Writer, node *vector.Node) error {
 	_, _ = w, node
 	return nil
 }
+
+func (h Helper) Marshal(w io.Writer, node *vector.Node) error {
+	_, _ = w, node
+	return nil
+}
