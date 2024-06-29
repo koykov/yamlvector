@@ -7,6 +7,7 @@ import (
 
 type Vector struct {
 	vector.Vector
+	init bool
 }
 
 func (vec *Vector) Parse(s []byte) error {
@@ -26,7 +27,7 @@ func (vec *Vector) ParseCopyStr(s string) error {
 }
 
 func NewVector() *Vector {
-	vec := &Vector{}
+	vec := &Vector{init: true}
 	// todo implement helper.
 	vec.Helper = nil
 	return vec
