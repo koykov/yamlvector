@@ -1,7 +1,7 @@
 package yamlvector
 
 import (
-	"github.com/koykov/fastconv"
+	"github.com/koykov/byteconv"
 	"github.com/koykov/vector"
 )
 
@@ -15,7 +15,7 @@ func (vec *Vector) Parse(s []byte) error {
 }
 
 func (vec *Vector) ParseStr(s string) error {
-	return vec.parse(fastconv.S2B(s), false)
+	return vec.parse(byteconv.S2B(s), false)
 }
 
 func (vec *Vector) ParseCopy(s []byte) error {
@@ -23,7 +23,7 @@ func (vec *Vector) ParseCopy(s []byte) error {
 }
 
 func (vec *Vector) ParseCopyStr(s string) error {
-	return vec.parse(fastconv.S2B(s), true)
+	return vec.parse(byteconv.S2B(s), true)
 }
 
 func NewVector() *Vector {
