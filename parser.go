@@ -6,7 +6,7 @@ import (
 	"github.com/koykov/vector"
 )
 
-var errBadInit = errors.New("bad vector initialization, use jsonvector.NewVector() or jsonvector.Acquire()")
+var errBadInit = errors.New("bad vector initialization, use yamlvector.NewVector() or yamlvector.Acquire()")
 
 func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	_, _ = s, copy
