@@ -16,3 +16,21 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	}
 	return vector.ErrNotImplement
 }
+
+func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, error) {
+	_, _ = depth, node
+	// todo implement me
+	return offset, nil
+}
+
+func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error) {
+	_, _ = depth, node
+	// todo implement me
+	return offset, nil
+}
+
+func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error) {
+	_, _ = depth, node
+	// todo implement me
+	return offset, nil
+}
