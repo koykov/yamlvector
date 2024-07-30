@@ -12,5 +12,5 @@ github.com/koykov/indirect v1.0.1 h1:1veVipIWBeklFHMvzuwhL82X5eDaJzN+hPeVGRvu22Y
 github.com/koykov/indirect v1.0.1/go.mod h1:2qWC0hrIHIexlKaqPA0VWEa0s2V/qxxNJv7XPncnh2I=
 github.com/koykov/openrt v0.0.0-20240411200908-3abd933415e1 h1:SJhDQ+N8JB0oZNRKhKFNjSJ6nzKFocYjaOH7pTbzJtE=
 github.com/koykov/openrt v0.0.0-20240411200908-3abd933415e1/go.mod h1:y8Xa99HTBmthCilUUW36IZJd5SP9Rb+W8S9CJaauyU8=
-github.com/koykov/vector v1.2.7-0.20240726171002-d570c518f65e h1:tGnbgpDMdgjGLY7IeKznPC33n3uMMiQD3JHPbYn5v2I=
-github.com/koykov/vector v1.2.7-0.20240726171002-d570c518f65e/go.mod h1:uLwgREqEN8H32uHIUPLAp9zC/R+wQKW06U097a0Z90s=
+github.com/koykov/vector v1.2.7-0.20240729201102-55129af2a872 h1:OvXv0SefCtaTNkBkzltjH3AlBjyfqFMc6TVrKN6Xd24=
+github.com/koykov/vector v1.2.7-0.20240729201102-55129af2a872/go.mod h1:uLwgREqEN8H32uHIUPLAp9zC/R+wQKW06U097a0Z90s=
