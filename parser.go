@@ -3,6 +3,7 @@ package yamlvector
 import (
 	"errors"
 
+	"github.com/koykov/bytealg"
 	"github.com/koykov/vector"
 )
 
@@ -14,7 +15,30 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		err = errBadInit
 		return
 	}
-	return vector.ErrNotImplement
+
+	s = bytealg.TrimBytesFmt4(s)
+	if err = vec.SetSrc(s, copy); err != nil {
+		return
+	}
+
+	offset := 0
+	// Create root node and register it.
+	root, i := vec.GetNode(0)
+
+	// Parse source data.
+	if offset, err = vec.parseGeneric(0, offset, root); err != nil {
+		vec.SetErrOffset(offset)
+		return err
+	}
+	vec.PutNode(i, root)
+
+	// Check unparsed tail.
+	if offset < vec.SrcLen() {
+		vec.SetErrOffset(offset)
+		return vector.ErrUnparsedTail
+	}
+
+	return
 }
 
 func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, error) {
