@@ -1,4 +1,4 @@
-aliases:  #последовательность настроек
+aliases:  # settings sequence
   - &myAlias1
     datakey: dataval 1
     moredata: morevals 1
