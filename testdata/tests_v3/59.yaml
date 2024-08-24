@@ -1,0 +1,13 @@
+scalar: > # Comment
+
+ folded
+ line
+ 
+ next
+ line
+  * one
+  * two
+
+ last
+ line
+
