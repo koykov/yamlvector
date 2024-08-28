@@ -5,6 +5,7 @@ func ensureTrueBin(src []byte, poffset *int) (ok bool) {
 	bin2 := binUnsafe(src, *poffset, 2)
 	bin3 := binUnsafe(src, *poffset, 3)
 	bin4 := binUnsafe(src, *poffset, 4)
+	_ = binBoolTrue[10]
 	switch {
 	case bin1 == binBoolTrue[0] || bin1 == binBoolTrue[1]:
 		*poffset += 1
@@ -27,6 +28,7 @@ func ensureFalseBin(src []byte, poffset *int) (ok bool) {
 	bin2 := binUnsafe(src, *poffset, 2)
 	bin3 := binUnsafe(src, *poffset, 3)
 	bin5 := binUnsafe(src, *poffset, 4)
+	_ = binBoolFalse[10]
 	switch {
 	case bin1 == binBoolFalse[0] || bin1 == binBoolFalse[1]:
 		*poffset += 1

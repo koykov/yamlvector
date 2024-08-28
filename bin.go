@@ -8,7 +8,6 @@ func binSafe(src []byte, offset, size int) uint64 {
 		return 0
 	}
 	_ = src[n-1]
-
 	switch size {
 	case 1:
 		return uint64(src[offset])
