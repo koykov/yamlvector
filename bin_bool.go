@@ -1,12 +1,10 @@
 package yamlvector
 
-import "unsafe"
-
 func ensureTrueBin(src []byte, poffset *int) (ok bool) {
-	bin1 := bin(src, *poffset, 1)
-	bin2 := bin(src, *poffset, 2)
-	bin3 := bin(src, *poffset, 3)
-	bin4 := bin(src, *poffset, 4)
+	bin1 := binUnsafe(src, *poffset, 1)
+	bin2 := binUnsafe(src, *poffset, 2)
+	bin3 := binUnsafe(src, *poffset, 3)
+	bin4 := binUnsafe(src, *poffset, 4)
 	switch {
 	case bin1 == binBoolTrue[0] || bin1 == binBoolTrue[1]:
 		*poffset += 1
@@ -25,10 +23,10 @@ func ensureTrueBin(src []byte, poffset *int) (ok bool) {
 }
 
 func ensureFalseBin(src []byte, poffset *int) (ok bool) {
-	bin1 := bin(src, *poffset, 1)
-	bin2 := bin(src, *poffset, 2)
-	bin3 := bin(src, *poffset, 3)
-	bin5 := bin(src, *poffset, 4)
+	bin1 := binUnsafe(src, *poffset, 1)
+	bin2 := binUnsafe(src, *poffset, 2)
+	bin3 := binUnsafe(src, *poffset, 3)
+	bin5 := binUnsafe(src, *poffset, 4)
 	switch {
 	case bin1 == binBoolFalse[0] || bin1 == binBoolFalse[1]:
 		*poffset += 1
@@ -79,9 +77,9 @@ var (
 
 func init() {
 	for i := 0; i < len(bBoolTrue); i++ {
-		binBoolTrue[i] = *(*uint64)(unsafe.Pointer(&bBoolTrue[i][0]))
+		binBoolTrue[i] = binSafe(bBoolTrue[i], 0, len(bBoolTrue[i]))
 	}
 	for i := 0; i < len(bBoolFalse); i++ {
-		binBoolFalse[i] = *(*uint64)(unsafe.Pointer(&bBoolFalse[i][0]))
+		binBoolFalse[i] = binSafe(bBoolFalse[i], 0, len(bBoolFalse[i]))
 	}
 }
