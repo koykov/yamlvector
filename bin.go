@@ -60,7 +60,7 @@ func binSafe(src []byte, offset, size int) uint64 {
 
 func binUnsafe(src []byte, offset, size int) uint64 {
 	n := len(src)
-	if offset+size >= n {
+	if offset+size > n {
 		return 0
 	}
 	_ = src[n-1]

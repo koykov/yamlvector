@@ -54,7 +54,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 	case ensureFalseBin(src, &offset):
 		// todo implement me
 	case ensureNullBin(src, &offset):
-		// todo implement me
+		node.SetType(vector.TypeNull)
 	}
 	return offset, err
 }
