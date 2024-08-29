@@ -147,3 +147,9 @@ func assertType(tb testing.TB, vec *Vector, path string, typ vector.Type) {
 		tb.Error("type mismatch, need", typ, "got", typ1)
 	}
 }
+
+func assertBool(tb testing.TB, vec *Vector, path string, val bool) {
+	if val1 := vec.Dot(path).Bool(); val1 != val {
+		tb.Error("type mismatch, need", val, "got", val1)
+	}
+}
