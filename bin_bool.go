@@ -48,23 +48,20 @@ func ensureFalseBin(src []byte, poffset *int) (ok bool) {
 
 var (
 	bBoolTrue = [11][]byte{
-		[]byte("true"),
-		[]byte("True"),
-		[]byte("TRUE"),
 		[]byte("y"),
 		[]byte("Y"),
-		[]byte("yes"),
-		[]byte("Yes"),
-		[]byte("YES"),
 		[]byte("on"),
 		[]byte("On"),
 		[]byte("ON"),
+		[]byte("yes"),
+		[]byte("Yes"),
+		[]byte("YES"),
+		[]byte("true"),
+		[]byte("True"),
+		[]byte("TRUE"),
 	}
 	binBoolTrue = [11]uint64{}
 	bBoolFalse  = [11][]byte{
-		[]byte("false"),
-		[]byte("False"),
-		[]byte("FALSE"),
 		[]byte("n"),
 		[]byte("N"),
 		[]byte("no"),
@@ -73,6 +70,9 @@ var (
 		[]byte("off"),
 		[]byte("Off"),
 		[]byte("OFF"),
+		[]byte("false"),
+		[]byte("False"),
+		[]byte("FALSE"),
 	}
 	binBoolFalse = [11]uint64{}
 )

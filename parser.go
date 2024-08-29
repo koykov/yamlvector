@@ -9,6 +9,8 @@ import (
 
 var errBadInit = errors.New("bad vector initialization, use yamlvector.NewVector() or yamlvector.Acquire()")
 
+var bBools = []byte("truefalse")
+
 func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	if !vec.init {
 		err = errBadInit
@@ -50,9 +52,11 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 	_ = src[n-1]
 	switch {
 	case ensureTrueBin(src, &offset):
-		// todo implement me
+		node.SetType(vector.TypeBool)
+		node.Value().Init(bBools, 0, 4)
 	case ensureFalseBin(src, &offset):
-		// todo implement me
+		node.SetType(vector.TypeBool)
+		node.Value().Init(bBools, 4, 5)
 	case ensureNullBin(src, &offset):
 		node.SetType(vector.TypeNull)
 	}
