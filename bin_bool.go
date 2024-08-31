@@ -24,22 +24,18 @@ func ensureTrueBin(src []byte, poffset *int) (ok bool) {
 }
 
 func ensureFalseBin(src []byte, poffset *int) (ok bool) {
-	bin1 := binUnsafe(src, *poffset, 1)
 	bin2 := binUnsafe(src, *poffset, 2)
 	bin3 := binUnsafe(src, *poffset, 3)
 	bin5 := binUnsafe(src, *poffset, 4)
-	_ = binBoolFalse[10]
+	_ = binBoolFalse[8]
 	switch {
-	case bin1 == binBoolFalse[0] || bin1 == binBoolFalse[1]:
-		*poffset += 1
-		ok = true
-	case bin2 == binBoolFalse[2] || bin2 == binBoolFalse[3] || bin2 == binBoolFalse[4]:
+	case bin2 == binBoolFalse[0] || bin2 == binBoolFalse[1] || bin2 == binBoolFalse[2]:
 		*poffset += 2
 		ok = true
-	case bin3 == binBoolFalse[5] || bin3 == binBoolFalse[6] || bin3 == binBoolFalse[7]:
+	case bin3 == binBoolFalse[3] || bin3 == binBoolFalse[4] || bin3 == binBoolFalse[5]:
 		*poffset += 3
 		ok = true
-	case bin5 == binBoolFalse[8] || bin5 == binBoolFalse[9] || bin5 == binBoolFalse[10]:
+	case bin5 == binBoolFalse[6] || bin5 == binBoolFalse[7] || bin5 == binBoolFalse[8]:
 		*poffset += 5
 		ok = true
 	}
@@ -61,9 +57,7 @@ var (
 		[]byte("TRUE"),
 	}
 	binBoolTrue = [11]uint64{}
-	bBoolFalse  = [11][]byte{
-		[]byte("n"),
-		[]byte("N"),
+	bBoolFalse  = [9][]byte{
 		[]byte("no"),
 		[]byte("No"),
 		[]byte("NO"),
@@ -74,7 +68,7 @@ var (
 		[]byte("False"),
 		[]byte("FALSE"),
 	}
-	binBoolFalse = [11]uint64{}
+	binBoolFalse = [9]uint64{}
 )
 
 func init() {
