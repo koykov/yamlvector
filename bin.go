@@ -79,3 +79,5 @@ var binMasks = [8]uint64{
 	0x00FFFFFFFFFFFFFF,
 	0xFFFFFFFFFFFFFFFF,
 }
+
+var _ = binUnsafe
