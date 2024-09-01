@@ -50,15 +50,22 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 	_ = srcp
 	n := len(src)
 	_ = src[n-1]
+
+	var (
+		typ vector.Type
+		bv  bool
+	)
+
 	switch {
-	case ensureTrueBin(src, &offset):
-		node.SetType(vector.TypeBool)
-		node.Value().Init(bBools, 0, 4)
-	case ensureFalseBin(src, &offset):
-		node.SetType(vector.TypeBool)
-		node.Value().Init(bBools, 4, 5)
-	case ensureNullBin(src, &offset):
-		node.SetType(vector.TypeNull)
+	case ensureNullOrBool(src, &offset, &typ, &bv):
+		node.SetType(typ)
+		if typ == vector.TypeBool {
+			if bv {
+				node.Value().Init(bBools, 0, 4)
+			} else {
+				node.Value().Init(bBools, 4, 5)
+			}
+		}
 	}
 	return offset, err
 }
