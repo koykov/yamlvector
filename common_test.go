@@ -153,3 +153,23 @@ func assertBool(tb testing.TB, vec *Vector, path string, val bool) {
 		tb.Error("type mismatch, need", val, "got", val1)
 	}
 }
+
+func bench(b *testing.B, fn func(vec *Vector)) {
+	vec := NewVector()
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		vec = assertParse(b, vec, nil, 0)
+		fn(vec)
+	}
+}
+
+func benchMulti(b *testing.B, buf *bytes.Buffer, fn func(vec *Vector)) {
+	vec := NewVector()
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		vec = assertParseMulti(b, vec, buf, nil, 0)
+		fn(vec)
+	}
+}
