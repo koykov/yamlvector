@@ -9,21 +9,26 @@ import (
 
 const bcamod = 10000
 
-func tokenHash(src []byte, offset *int) (hsum uint64) {
-	lim := 8
-	if rest := len(src) - *offset; rest < 8 {
+func tokenHash(src []byte, offset *int) (hsum uint64, eol bool) {
+	lim, n := 8, len(src)
+	if rest := n - *offset; rest < 8 {
 		lim = rest
 	}
 	_ = tokend[math.MaxUint8-1]
-	for i := 0; i < lim && !tokend[i]; i++ {
+	var i int
+	for i = 0; i < lim && !tokend[i]; i++ {
 		hsum = hsum | uint64(src[*offset])<<(i*8)
 		*offset++
 	}
+	eol = tokend[i] || *offset == n
 	return
 }
 
 func ensureNullOrBool(src []byte, offset *int, typ *vector.Type, b *bool) bool {
-	hsum := tokenHash(src, offset)
+	hsum, eol := tokenHash(src, offset)
+	if !eol {
+		return false
+	}
 	idx := hsum % bcamod
 	_ = bca[bcamod-1]
 	if tuple := bca[idx]; tuple != nil {
