@@ -35,6 +35,16 @@ func TestScalar(t *testing.T) {
 		assertType(t, vec, "", vector.TypeBool)
 		assertBool(t, vec, "", true)
 	})
+	t.Run("scalar_number", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNumber)
+		assertNumber(t, vec, "", 123456)
+	})
+	t.Run("scalar_number_float", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNumber)
+		assertNumber(t, vec, "", 3.1415)
+	})
 }
 
 func BenchmarkScalar(b *testing.B) {
@@ -66,6 +76,16 @@ func BenchmarkScalar(b *testing.B) {
 	b.Run("scalar_bool_on", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
 			assertType(b, vec, "", vector.TypeBool)
+		})
+	})
+	b.Run("scalar_number", func(b *testing.B) {
+		bench(b, func(vec *Vector) {
+			assertType(b, vec, "", vector.TypeNumber)
+		})
+	})
+	b.Run("scalar_number_float", func(b *testing.B) {
+		bench(b, func(vec *Vector) {
+			assertType(b, vec, "", vector.TypeNumber)
 		})
 	})
 }

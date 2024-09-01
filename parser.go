@@ -47,7 +47,6 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 	node.SetOffset(vec.Index.Len(depth))
 	src := vec.Src()
 	srcp := vec.SrcAddr()
-	_ = srcp
 	n := len(src)
 	_ = src[n-1]
 
@@ -66,6 +65,17 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 				node.Value().Init(bBools, 4, 5)
 			}
 		}
+	case ensureDigit(src[offset]):
+		i := offset
+		for ensureDigit(src[i]) {
+			i++
+			if i == n {
+				break
+			}
+		}
+		node.SetType(vector.TypeNumber)
+		node.Value().InitRaw(srcp, offset, i-offset)
+		offset = i
 	}
 	return offset, err
 }

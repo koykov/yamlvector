@@ -25,6 +25,7 @@ func tokenHash(src []byte, offset *int) (hsum uint64, eol bool) {
 }
 
 func ensureNullOrBool(src []byte, offset *int, typ *vector.Type, b *bool) bool {
+	origin := *offset
 	hsum, eol := tokenHash(src, offset)
 	if !eol {
 		return false
@@ -36,6 +37,7 @@ func ensureNullOrBool(src []byte, offset *int, typ *vector.Type, b *bool) bool {
 		*b = tuple.b
 		return true
 	}
+	*offset = origin
 	return false
 }
 
