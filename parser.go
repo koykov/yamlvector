@@ -76,6 +76,12 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		node.SetType(vector.TypeNumber)
 		node.Value().InitRaw(srcp, offset, i-offset)
 		offset = i
+	default:
+		// raw string case
+		i := eol(src, offset)
+		node.SetType(vector.TypeString)
+		node.Value().InitRaw(srcp, offset, i-offset)
+		offset = i
 	}
 	return offset, err
 }
