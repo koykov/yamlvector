@@ -48,7 +48,6 @@ func TestScalar(t *testing.T) {
 	t.Run("scalar_string", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
 		assertType(t, vec, "", vector.TypeString)
-		t.Log(vec.Root().String())
 	})
 }
 
@@ -91,6 +90,11 @@ func BenchmarkScalar(b *testing.B) {
 	b.Run("scalar_number_float", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
 			assertType(b, vec, "", vector.TypeNumber)
+		})
+	})
+	b.Run("scalar_string", func(b *testing.B) {
+		bench(b, func(vec *Vector) {
+			assertType(b, vec, "", vector.TypeString)
 		})
 	})
 }
