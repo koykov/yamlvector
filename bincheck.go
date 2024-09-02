@@ -28,6 +28,7 @@ func ensureNullOrBool(src []byte, offset *int, typ *vector.Type, b *bool) bool {
 	origin := *offset
 	hsum, eol := tokenHash(src, offset)
 	if !eol {
+		*offset = origin
 		return false
 	}
 	idx := hsum % bcamod
