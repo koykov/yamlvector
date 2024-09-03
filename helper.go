@@ -6,6 +6,11 @@ import (
 	"github.com/koykov/vector"
 )
 
+const (
+	flagEscapedString = 0
+	flagFoldBlock     = 1
+)
+
 type Helper struct{}
 
 var (
