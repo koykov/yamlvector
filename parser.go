@@ -76,6 +76,33 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		node.SetType(vector.TypeNumber)
 		node.Value().InitRaw(srcp, offset, i-offset)
 		offset = i
+	case src[offset] == '"':
+		// escaped string
+		node.SetType(vector.TypeStr)
+		node.Value().SetAddr(srcp, n).SetOffset(offset + 1)
+		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
+		if e < 0 {
+			return n, vector.ErrUnexpEOS
+		}
+		node.Value().SetBit(flagEscapedString, true) // Always mark string as escaped to avoid double indexing.
+		if src[e-1] != '\\' {
+			node.Value().SetLen(e - offset - 1)
+			offset = e + 1
+		} else {
+			for i := e; i < n; {
+				i = bytealg.IndexByteAtBytes(src, '"', i+1)
+				if i < 0 {
+					e = n - 1
+					break
+				}
+				e = i
+				if src[e-1] != '\\' {
+					break
+				}
+			}
+			node.Value().SetLen(e - offset - 1)
+			offset = e + 1
+		}
 	case src[offset] == '|':
 		// string block
 		i := eot(src, offset)

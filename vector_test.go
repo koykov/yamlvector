@@ -57,6 +57,10 @@ func TestScalar(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
 		assertType(t, vec, "", vector.TypeString)
 	})
+	t.Run("scalar_string_escape", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeString)
+	})
 }
 
 func BenchmarkScalar(b *testing.B) {
