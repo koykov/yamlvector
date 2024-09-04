@@ -24,9 +24,11 @@ type multiStage struct {
 }
 
 var (
-	stages      []stage
-	multiStages []multiStage
-	bNl         = []byte("\n")
+	stages         []stage
+	stagesReg      = map[string]int{}
+	multiStages    []multiStage
+	multiStagesReg = map[string]int{}
+	bNl            = []byte("\n")
 )
 
 func init() {
@@ -39,6 +41,7 @@ func init() {
 				st.json = bytealg.Trim(st.json, bNl)
 			}
 			stages = append(stages, st)
+			stagesReg[st.key] = len(stages) - 1
 			return nil
 		}
 
@@ -58,29 +61,26 @@ func init() {
 				return nil
 			})
 			multiStages = append(multiStages, mstg)
+			multiStagesReg[mstg.key] = len(multiStages) - 1
 		}
 		return nil
 	})
 }
 
-func getStage(key string) (st *stage) {
-	for i := 0; i < len(stages); i++ {
-		st1 := &stages[i]
-		if st1.key == key {
-			st = st1
-		}
+func getStage(key string) *stage {
+	i, ok := stagesReg[key]
+	if !ok {
+		return nil
 	}
-	return st
+	return &stages[i]
 }
 
-func getStageMulti(key string) (st *multiStage) {
-	for i := 0; i < len(multiStages); i++ {
-		st1 := &multiStages[i]
-		if st1.key == key {
-			st = st1
-		}
+func getStageMulti(key string) *multiStage {
+	i, ok := multiStagesReg[key]
+	if !ok {
+		return nil
 	}
-	return st
+	return &multiStages[i]
 }
 
 func getTBName(tb testing.TB) string {
