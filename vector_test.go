@@ -109,4 +109,19 @@ func BenchmarkScalar(b *testing.B) {
 			assertType(b, vec, "", vector.TypeString)
 		})
 	})
+	b.Run("scalar_string_no_fmt", func(b *testing.B) {
+		bench(b, func(vec *Vector) {
+			assertType(b, vec, "", vector.TypeString)
+		})
+	})
+	b.Run("scalar_string_keep_fmt", func(b *testing.B) {
+		bench(b, func(vec *Vector) {
+			assertType(b, vec, "", vector.TypeString)
+		})
+	})
+	b.Run("scalar_string_escape", func(b *testing.B) {
+		bench(b, func(vec *Vector) {
+			assertType(b, vec, "", vector.TypeString)
+		})
+	})
 }
