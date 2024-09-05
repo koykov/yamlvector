@@ -89,16 +89,16 @@ func getTBName(tb testing.TB) string {
 }
 
 func assertParse(tb testing.TB, dst *Vector, err error, errOffset int) *Vector {
-	dst, _ = assertParseStage(tb, dst, err, errOffset)
-	return dst
-}
-
-func assertParseStage(tb testing.TB, dst *Vector, err error, errOffset int) (*Vector, *stage) {
 	key := getTBName(tb)
 	st := getStage(key)
 	if st == nil {
 		tb.Fatal("stage not found")
 	}
+	dst = assertParseStage(tb, st, dst, err, errOffset)
+	return dst
+}
+
+func assertParseStage(tb testing.TB, st *stage, dst *Vector, err error, errOffset int) *Vector {
 	dst.Reset()
 	err1 := dst.ParseCopy(st.origin)
 	if err1 != nil {
@@ -110,7 +110,7 @@ func assertParseStage(tb testing.TB, dst *Vector, err error, errOffset int) (*Ve
 			tb.Fatalf(`err "%s" caught by offset %d`, err1.Error(), dst.ErrorOffset())
 		}
 	}
-	return dst, st
+	return dst
 }
 
 func assertParseMulti(tb testing.TB, dst *Vector, buf *bytes.Buffer, err error, errOffset int) *Vector {
@@ -119,6 +119,10 @@ func assertParseMulti(tb testing.TB, dst *Vector, buf *bytes.Buffer, err error, 
 	if mst == nil {
 		tb.Fatal("stage not found")
 	}
+	return assertParseStageMulti(tb, mst, dst, buf, err, errOffset)
+}
+
+func assertParseStageMulti(tb testing.TB, mst *multiStage, dst *Vector, buf *bytes.Buffer, err error, errOffset int) *Vector {
 	dst.Reset()
 	for i := 0; i < len(mst.buf); i++ {
 		st := &mst.buf[i]
@@ -165,21 +169,33 @@ func assertNumber(tb testing.TB, vec *Vector, path string, val float64) {
 }
 
 func bench(b *testing.B, fn func(vec *Vector)) {
+	key := getTBName(b)
+	st := getStage(key)
+	if st == nil {
+		b.Fatal("stage not found")
+	}
+
 	vec := NewVector()
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		vec = assertParse(b, vec, nil, 0)
+		vec = assertParseStage(b, st, vec, nil, 0)
 		fn(vec)
 	}
 }
 
 func benchMulti(b *testing.B, buf *bytes.Buffer, fn func(vec *Vector)) {
+	key := getTBName(b)
+	mst := getStageMulti(key)
+	if mst == nil {
+		b.Fatal("stage not found")
+	}
+
 	vec := NewVector()
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		vec = assertParseMulti(b, vec, buf, nil, 0)
+		vec = assertParseStageMulti(b, mst, vec, buf, nil, 0)
 		fn(vec)
 	}
 }
