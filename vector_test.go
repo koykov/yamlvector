@@ -64,64 +64,16 @@ func TestScalar(t *testing.T) {
 }
 
 func BenchmarkScalar(b *testing.B) {
-	b.Run("scalar_null", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeNull)
-		})
-	})
-	b.Run("scalar_null_canonical", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeNull)
-		})
-	})
-	b.Run("scalar_null_none", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeNull)
-		})
-	})
-	b.Run("scalar_bool", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeBool)
-		})
-	})
-	b.Run("scalar_bool_low", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeBool)
-		})
-	})
-	b.Run("scalar_bool_on", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeBool)
-		})
-	})
-	b.Run("scalar_number", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeNumber)
-		})
-	})
-	b.Run("scalar_number_float", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeNumber)
-		})
-	})
-	b.Run("scalar_string", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeString)
-		})
-	})
-	b.Run("scalar_string_no_fmt", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeString)
-		})
-	})
-	b.Run("scalar_string_keep_fmt", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeString)
-		})
-	})
-	b.Run("scalar_string_escape", func(b *testing.B) {
-		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeString)
-		})
-	})
+	b.Run("scalar_null", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNull) }) })
+	b.Run("scalar_null_canonical", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNull) }) })
+	b.Run("scalar_null_none", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNull) }) })
+	b.Run("scalar_bool", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeBool) }) })
+	b.Run("scalar_bool_low", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeBool) }) })
+	b.Run("scalar_bool_on", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeBool) }) })
+	b.Run("scalar_number", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNumber) }) })
+	b.Run("scalar_number_float", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNumber) }) })
+	b.Run("scalar_string", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeString) }) })
+	b.Run("scalar_string_no_fmt", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeString) }) })
+	b.Run("scalar_string_keep_fmt", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeString) }) })
+	b.Run("scalar_string_escape", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeString) }) })
 }
