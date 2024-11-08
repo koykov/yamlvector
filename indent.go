@@ -8,9 +8,10 @@ const (
 	indentDown
 )
 
-func (vec *Vector) indentDW(p []byte, offset int) (indent, int) {
+func (vec *Vector) indentDW(p []byte, offset, n int) (indent, int) {
 	dir := indentEqual
 	i := offset
+	_ = p[n-1]
 	for p[i] == ' ' {
 		i++
 	}
