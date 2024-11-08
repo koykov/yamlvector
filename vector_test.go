@@ -63,6 +63,14 @@ func TestScalar(t *testing.T) {
 	})
 }
 
+func TestObject(t *testing.T) {
+	vec := NewVector()
+	t.Run("object_multi_line", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeObject)
+	})
+}
+
 func BenchmarkScalar(b *testing.B) {
 	b.Run("scalar_null", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNull) }) })
 	b.Run("scalar_null_canonical", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNull) }) })
