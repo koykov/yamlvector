@@ -7,7 +7,8 @@ import (
 
 type Vector struct {
 	vector.Vector
-	init bool
+	init   bool
+	indent int
 }
 
 func (vec *Vector) Parse(s []byte) error {
