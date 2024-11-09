@@ -2,6 +2,7 @@ package yamlvector
 
 import (
 	"errors"
+	"unicode/utf8"
 
 	"github.com/koykov/bytealg"
 	"github.com/koykov/vector"
@@ -43,6 +44,28 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 }
 
 func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, error) {
+	var err error
+	node.SetOffset(vec.Index.Len(depth))
+	src := vec.Src()
+	// srcp := vec.SrcAddr()
+	n := len(src)
+	_ = src[n-1]
+
+	for offset < n {
+		r, w := utf8.DecodeRune(src[offset:])
+		if r == utf8.RuneError {
+			return offset, ErrBadUTF8
+		}
+
+		// todo implement rune based approach
+
+		offset += w
+	}
+
+	return offset, err
+}
+
+func (vec *Vector) parseGeneric1(depth, offset int, node *vector.Node) (int, error) {
 	var err error
 	node.SetOffset(vec.Index.Len(depth))
 	src := vec.Src()
