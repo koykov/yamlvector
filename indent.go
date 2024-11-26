@@ -8,7 +8,8 @@ const (
 	indentDown
 )
 
-func (vec *Vector) indentDW(p []byte, offset, n int) (indent, int) {
+// indent direction/width check
+func (vec *Vector) indentDW(p []byte, offset, n int) (indent, int, int) {
 	dir := indentEqual
 	i := offset
 	_ = p[n-1]
@@ -17,13 +18,12 @@ func (vec *Vector) indentDW(p []byte, offset, n int) (indent, int) {
 	}
 	d := i - offset
 	switch {
-	case d == vec.indent:
-		return dir, offset
 	case d < vec.indent:
 		dir = indentUp
 	case d > vec.indent:
 		dir = indentDown
 	}
+	offset = i
 
-	return dir, offset
+	return dir, offset, d
 }

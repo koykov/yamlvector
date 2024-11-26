@@ -52,6 +52,10 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 	_ = src[n-1]
 
 	for offset < n {
+		var ind indent
+		ind, offset, vec.indent = vec.indentDW(src, offset, n)
+		_ = ind
+
 		r, w := utf8.DecodeRune(src[offset:])
 		if r == utf8.RuneError {
 			return offset, ErrBadUTF8
