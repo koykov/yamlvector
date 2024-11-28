@@ -64,6 +64,13 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			return offset, ErrBadUTF8
 		}
 
+		switch {
+		case node.Type() == vector.TypeUnknown && r != '-':
+			node.SetType(vector.TypeObject)
+		case node.Type() == vector.TypeUnknown && r == '-':
+			node.SetType(vector.TypeArray)
+		}
+
 		// todo implement rune based approach
 
 		offset += w
