@@ -25,7 +25,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 
 	offset := 0
 	// Create root node and register it.
-	root, i := vec.AcquireNode(0)
+	root, i := vec.AcquireNodeWithType(0, vector.TypeObject)
 
 	// Parse source data.
 	if offset, err = vec.parseGeneric(0, offset, root); err != nil {
@@ -53,11 +53,11 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 
 	for offset < n {
 		var ind indent
-		ind, vec.indent = vec.indentDW(src, offset, n)
+		ind, vec.indw = vec.indentDW(src, offset, n)
 		if ind == indentUp {
 			return offset, nil
 		}
-		offset += vec.indent
+		offset += vec.indw
 
 		r, w := utf8.DecodeRune(src[offset:])
 		if r == utf8.RuneError {
