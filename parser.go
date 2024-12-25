@@ -79,6 +79,18 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 	return offset, err
 }
 
+func scanl(src []byte, n, offset int) (pos, semicolon int, eof bool) {
+	semicolon = -1
+	_ = src[n-1]
+	for pos = offset; pos < n; pos++ {
+		if src[pos] == ':' {
+			semicolon = pos
+		}
+	}
+	eof = pos == n-1
+	return
+}
+
 func (vec *Vector) parseGeneric1(depth, offset int, node *vector.Node) (int, error) {
 	var err error
 	node.SetOffset(vec.Index.Len(depth))
