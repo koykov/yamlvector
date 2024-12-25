@@ -55,6 +55,9 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		var ind indent
 		ind, vec.indw = vec.indentDW(src, offset, n)
 		offset += vec.indw
+		if src[offset] == '\t' {
+			return offset, ErrBadIndent
+		}
 		if ind == indentUp {
 			return offset, nil
 		}
