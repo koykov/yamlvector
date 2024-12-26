@@ -94,6 +94,18 @@ func scanl(src []byte, n, offset int) (pos, semicolon int, eof bool) {
 	return
 }
 
+func scans(src []byte, b byte, offset int) (pos int, eof bool) {
+	for {
+		if pos = bytealg.IndexByteAtBytes(src, b, offset); pos == -1 {
+			return pos, true
+		}
+		if src[pos-1] != '\\' {
+			break
+		}
+	}
+	return
+}
+
 func (vec *Vector) parseGeneric1(depth, offset int, node *vector.Node) (int, error) {
 	var err error
 	node.SetOffset(vec.Index.Len(depth))
