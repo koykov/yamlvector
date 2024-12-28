@@ -2,7 +2,6 @@ package yamlvector
 
 import (
 	"errors"
-	"unicode/utf8"
 
 	"github.com/koykov/bytealg"
 	"github.com/koykov/vector"
@@ -57,26 +56,28 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		if ind == indentUp {
 			return offset, nil
 		}
-		offset += vec.indw
-		if src[offset] == '\t' {
+		if src[offset+vec.indw] == '\t' {
 			return offset, ErrBadIndent
 		}
 
-		r, w := utf8.DecodeRune(src[offset:])
-		if r == utf8.RuneError {
-			return offset, ErrBadUTF8
+		if src[offset] == '-' {
+			// todo parse array
+		}
+		p, sc, eof := scanl(src, n, offset)
+		_, _ = sc, eof
+		if sc != -1 {
+			// todo parse object
+		} else if c := src[offset]; c == '"' || c == '\'' {
+			// todo parse string
+		} else {
+			l := src[offset:p]
+			_ = l
+			switch {
+			// todo check null/bool/digit
+			}
 		}
 
-		switch {
-		case node.Type() == vector.TypeUnknown && r != '-':
-			node.SetType(vector.TypeObject)
-		case node.Type() == vector.TypeUnknown && r == '-':
-			node.SetType(vector.TypeArray)
-		}
-
-		// todo implement rune based approach
-
-		offset += w
+		offset += vec.indw
 	}
 
 	return offset, err
