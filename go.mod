@@ -3,7 +3,7 @@ module github.com/koykov/yamlvector
 go 1.18
 
 require (
-	github.com/koykov/bytealg v1.0.6
+	github.com/koykov/bytealg v1.0.7
 	github.com/koykov/byteconv v1.0.1
 	github.com/koykov/vector v1.2.7-0.20240818194625-bba8502a3059
 )
