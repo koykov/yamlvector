@@ -83,6 +83,18 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 	return offset, err
 }
 
+func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error) {
+	_, _ = depth, node
+	// todo implement me
+	return offset, nil
+}
+
+func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error) {
+	_, _ = depth, node
+	// todo implement me
+	return offset, nil
+}
+
 func (vec *Vector) parseGeneric1(depth, offset int, node *vector.Node) (int, error) {
 	var err error
 	node.SetOffset(vec.Index.Len(depth))
@@ -165,16 +177,4 @@ func (vec *Vector) parseGeneric1(depth, offset int, node *vector.Node) (int, err
 		offset = i
 	}
 	return offset, err
-}
-
-func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error) {
-	_, _ = depth, node
-	// todo implement me
-	return offset, nil
-}
-
-func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error) {
-	_, _ = depth, node
-	// todo implement me
-	return offset, nil
 }
