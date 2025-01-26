@@ -9,6 +9,8 @@ type Vector struct {
 	vector.Vector
 	init bool
 	indw int
+
+	isFold, isLit, IsRawFold bool
 }
 
 func (vec *Vector) Parse(s []byte) error {
@@ -32,4 +34,17 @@ func NewVector() *Vector {
 	// todo implement helper.
 	vec.Helper = nil
 	return vec
+}
+
+func (vec *Vector) Reset() {
+	vec.Vector.Reset()
+	vec.init = false
+	vec.indw = 0
+	vec.isFold = false
+	vec.isLit = false
+	vec.IsRawFold = false
+}
+
+func (vec *Vector) isDoc() bool {
+	return vec.isFold || vec.isLit || vec.IsRawFold
 }
