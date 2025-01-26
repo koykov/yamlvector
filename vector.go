@@ -9,8 +9,10 @@ type Vector struct {
 	vector.Vector
 	init bool
 	indw int
+	ind  int
+	inds indent
 
-	isFold, isLit, IsRawFold bool
+	lineFC, isFold, isLit, IsRawFold bool
 }
 
 func (vec *Vector) Parse(s []byte) error {
@@ -40,6 +42,8 @@ func (vec *Vector) Reset() {
 	vec.Vector.Reset()
 	vec.init = false
 	vec.indw = 0
+	vec.ind = 0
+	vec.lineFC = false
 	vec.isFold = false
 	vec.isLit = false
 	vec.IsRawFold = false
@@ -47,4 +51,21 @@ func (vec *Vector) Reset() {
 
 func (vec *Vector) isDoc() bool {
 	return vec.isFold || vec.isLit || vec.IsRawFold
+}
+
+func (vec *Vector) indent(r rune) {
+	if vec.lineFC && (r == '\n' || r == '\r') && vec.isDoc() {
+		return
+	}
+	if vec.lineFC && r == ' ' {
+		vec.ind++
+		return
+	}
+	if !vec.lineFC {
+		vec.inds = indentEqual
+		return
+	}
+	// todo update indent level
+	// todo update indent state
+	vec.lineFC = false
 }
