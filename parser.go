@@ -9,8 +9,6 @@ import (
 
 var errBadInit = errors.New("bad vector initialization, use yamlvector.NewVector() or yamlvector.Acquire()")
 
-var bBools = []byte("truefalse")
-
 func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	if !vec.init {
 		err = errBadInit
@@ -42,44 +40,8 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	return
 }
 
-func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, error) {
-	var err error
-	node.SetOffset(vec.Index.Len(depth))
-	src := vec.Src()
-	// srcp := vec.SrcAddr()
-	n := len(src)
-	_ = src[n-1]
-
-	for offset < n {
-		var ind indent
-		ind, vec.indw = vec.indentDW(src, offset, n)
-		if ind == indentUp {
-			return offset, nil
-		}
-		if src[offset+vec.indw] == '\t' {
-			return offset, ErrBadIndent
-		}
-
-		if src[offset] == '-' {
-			// todo parse array
-		}
-		p, sc, eof := scanl(src, n, offset)
-		_, _ = sc, eof
-		if sc != -1 {
-			// todo parse object
-		} else if c := src[offset]; c == '"' || c == '\'' {
-			// todo parse string
-		} else {
-			l := src[offset:p]
-			_ = l
-			switch {
-			// todo check null/bool/digit
-			}
-		}
-
-		offset += vec.indw
-	}
-
+func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (_ int, err error) {
+	// todo implement me
 	return offset, err
 }
 
@@ -93,88 +55,4 @@ func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error)
 	_, _ = depth, node
 	// todo implement me
 	return offset, nil
-}
-
-func (vec *Vector) parseGeneric1(depth, offset int, node *vector.Node) (int, error) {
-	var err error
-	node.SetOffset(vec.Index.Len(depth))
-	src := vec.Src()
-	srcp := vec.SrcAddr()
-	n := len(src)
-	_ = src[n-1]
-
-	var (
-		typ vector.Type
-		bv  bool
-	)
-
-	switch {
-	case ensureNullOrBool(src, &offset, &typ, &bv):
-		node.SetType(typ)
-		if typ == vector.TypeBool {
-			if bv {
-				node.Value().Init(bBools, 0, 4)
-			} else {
-				node.Value().Init(bBools, 4, 5)
-			}
-		}
-	case ensureDigit(src[offset]):
-		i := offset
-		for ensureDigit(src[i]) {
-			i++
-			if i == n {
-				break
-			}
-		}
-		node.SetType(vector.TypeNumber)
-		node.Value().InitRaw(srcp, offset, i-offset)
-		offset = i
-	case src[offset] == '"':
-		// escaped string
-		node.SetType(vector.TypeStr)
-		node.Value().SetAddr(srcp, n).SetOffset(offset + 1)
-		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
-		if e < 0 {
-			return n, vector.ErrUnexpEOS
-		}
-		node.Value().SetBit(flagEscapedString, true) // Always mark string as escaped to avoid double indexing.
-		if src[e-1] != '\\' {
-			node.Value().SetLen(e - offset - 1)
-			offset = e + 1
-		} else {
-			for i := e; i < n; {
-				i = bytealg.IndexByteAtBytes(src, '"', i+1)
-				if i < 0 {
-					e = n - 1
-					break
-				}
-				e = i
-				if src[e-1] != '\\' {
-					break
-				}
-			}
-			node.Value().SetLen(e - offset - 1)
-			offset = e + 1
-		}
-	case src[offset] == '|':
-		// string block
-		i := eot(src, offset)
-		node.SetType(vector.TypeString)
-		node.Value().InitRaw(srcp, offset, i-offset)
-		offset = i
-	case src[offset] == '>':
-		// foldable string block
-		i := eot(src, offset)
-		node.SetType(vector.TypeString)
-		node.Value().InitRaw(srcp, offset, i-offset).
-			SetBit(flagFoldBlock, true)
-		offset = i
-	default:
-		// raw string case
-		i := eol(src, offset)
-		node.SetType(vector.TypeString)
-		node.Value().InitRaw(srcp, offset, i-offset)
-		offset = i
-	}
-	return offset, err
 }
