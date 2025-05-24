@@ -2,6 +2,7 @@ package yamlvector
 
 import (
 	"errors"
+	"unicode"
 
 	"github.com/koykov/bytealg"
 	"github.com/koykov/vector"
@@ -55,4 +56,25 @@ func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error)
 	_, _ = depth, node
 	// todo implement me
 	return offset, nil
+}
+
+func (vec *Vector) skipws() {
+	for {
+		r, w, err := vec.ReadRuneAt(int(vec.pos))
+		if err != nil {
+			break
+		}
+		if !unicode.IsSpace(r) {
+			break
+		}
+		vec.pos += uint(w)
+	}
+}
+
+func (vec *Vector) skipl() {
+	i := bytealg.IndexByteAtBytes(vec.Src(), '\n', int(vec.pos))
+	if i < 0 {
+		return
+	}
+	vec.pos += uint(i + 1)
 }

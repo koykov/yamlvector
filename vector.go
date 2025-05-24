@@ -8,6 +8,11 @@ import (
 type Vector struct {
 	vector.Vector
 	init bool
+
+	pos  uint
+	line uint
+	col  uint
+	pcol uint
 }
 
 func (vec *Vector) Parse(s []byte) error {
@@ -36,4 +41,9 @@ func NewVector() *Vector {
 func (vec *Vector) Reset() {
 	vec.Vector.Reset()
 	vec.init = false
+
+	vec.pos = 0
+	vec.line = 0
+	vec.col = 0
+	vec.pcol = 0
 }
