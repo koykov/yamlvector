@@ -1,8 +1,12 @@
 package yamlvector
 
-import "fmt"
+import (
+	"fmt"
 
-type ttoken int
+	"github.com/koykov/vector"
+)
+
+type ttoken uint8
 
 const (
 	tokenError ttoken = iota
@@ -73,11 +77,11 @@ func (tt ttoken) String() string {
 
 type token struct {
 	typ  ttoken
-	val  string
-	line int
-	col  int
+	raw  vector.Byteptr
+	line uint64
+	col  uint64
 }
 
 func (t token) String() string {
-	return fmt.Sprintf("%s (%d:%d): %q", t.typ.String(), t.line, t.col, t.val)
+	return fmt.Sprintf("%s (%d:%d): %q", t.typ.String(), t.line, t.col, t.raw)
 }

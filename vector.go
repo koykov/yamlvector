@@ -9,10 +9,11 @@ type Vector struct {
 	vector.Vector
 	init bool
 
-	pos  uint
-	line uint
-	col  uint
-	pcol uint
+	t    token
+	pos  uint64
+	line uint64
+	col  uint64
+	pcol uint64
 }
 
 func (vec *Vector) Parse(s []byte) error {
