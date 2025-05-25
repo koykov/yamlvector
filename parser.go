@@ -58,17 +58,107 @@ func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error)
 	return offset, nil
 }
 
-func (vec *Vector) skipws() {
+func (vec *Vector) nextToken() (*token, error) {
+	if err := vec.skipws(); err != nil {
+		return nil, err
+	}
+
+	r, w, err := vec.ReadRuneAt(int(vec.pos))
+	if err != nil {
+		return nil, err
+	}
+	switch r {
+	case '-':
+		// multiline literal
+		// todo implement me
+	case ':':
+		vec.t.typ = tokenColon
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		return &vec.t, nil
+	case ',':
+		vec.t.typ = tokenComma
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		return &vec.t, nil
+	case '[':
+		vec.t.typ = tokenLBracket
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		return &vec.t, nil
+	case ']':
+		vec.t.typ = tokenRBracket
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		return &vec.t, nil
+	case '{':
+		vec.t.typ = tokenLBrace
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		return &vec.t, nil
+	case '}':
+		vec.t.typ = tokenRBrace
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		return &vec.t, nil
+	case '#':
+		vec.t.typ = tokenComment
+		hi := vec.readComment()
+		vec.t.setlo(vec.pos).sethi(hi)
+		return &vec.t, nil
+	case '&':
+		vec.t.typ = tokenAnchor
+		hi := vec.readAnchor()
+		vec.t.setlo(vec.pos).sethi(hi)
+		return &vec.t, nil
+	case '*':
+		vec.t.typ = tokenAlias
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		return &vec.t, nil
+	case '!':
+		vec.t.typ = tokenTag
+		hi := vec.readTag()
+		vec.t.setlo(vec.pos).sethi(hi)
+		return &vec.t, nil
+	case '%':
+		vec.t.typ = tokenDirective
+		hi := vec.readDirective()
+		vec.t.setlo(vec.pos).sethi(hi)
+		return &vec.t, nil
+	case '"', '\'':
+		vec.t.typ = tokenString
+		hi := vec.readString()
+		vec.t.setlo(vec.pos).sethi(hi)
+		return &vec.t, nil
+	default:
+		if unicode.IsLetter(r) || r == '+' || r == '.' {
+			vec.t.typ = tokenNumber
+			hi := vec.readNumber()
+			vec.t.setlo(vec.pos).sethi(hi)
+			return &vec.t, nil
+		}
+
+		if unicode.IsLetter(r) {
+			typ, hi := vec.readKeyword()
+			vec.t.typ = typ
+			vec.t.setlo(vec.pos).sethi(hi)
+			return &vec.t, nil
+		}
+	}
+	return nil, nil
+}
+
+func (vec *Vector) parseString() error {
+	// todo implement me
+	return nil
+}
+
+func (vec *Vector) skipws() error {
 	for {
 		r, w, err := vec.ReadRuneAt(int(vec.pos))
 		if err != nil {
-			break
+			return err
 		}
 		if !unicode.IsSpace(r) {
 			break
 		}
 		vec.pos += uint(w)
 	}
+	return nil
 }
 
 func (vec *Vector) skipl() {

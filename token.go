@@ -2,8 +2,6 @@ package yamlvector
 
 import (
 	"fmt"
-
-	"github.com/koykov/vector"
 )
 
 type ttoken uint8
@@ -76,12 +74,20 @@ func (tt ttoken) String() string {
 }
 
 type token struct {
-	typ  ttoken
-	raw  vector.Byteptr
-	line uint64
-	col  uint64
+	typ    ttoken
+	lo, hi uint64
 }
 
-func (t token) String() string {
-	return fmt.Sprintf("%s (%d:%d): %q", t.typ.String(), t.line, t.col, t.raw)
+func (t *token) String() string {
+	return fmt.Sprintf("%s (%d:%d)", t.typ.String(), t.lo, t.hi)
+}
+
+func (t *token) setlo(lo uint64) *token {
+	t.lo = lo
+	return t
+}
+
+func (t *token) sethi(hi uint64) *token {
+	t.hi = hi
+	return t
 }
