@@ -67,10 +67,26 @@ func (vec *Vector) nextToken() (*token, error) {
 	if err != nil {
 		return nil, err
 	}
+	vec.pos += uint64(w)
 	switch r {
 	case '-':
 		// multiline literal
-		// todo implement me
+		r1, _, err1 := vec.ReadRuneAt(int(vec.pos))
+		if err1 != nil {
+			return nil, err1
+		}
+		if r1 == ' ' {
+			vec.t.typ = tokenDash
+			vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+			vec.pos += 1
+			return &vec.t, nil
+		}
+		if unicode.IsDigit(r1) {
+			vec.t.typ = tokenNumber
+			hi := vec.readNumber()
+			vec.t.setlo(vec.pos).sethi(hi)
+			return &vec.t, nil
+		}
 	case ':':
 		vec.t.typ = tokenColon
 		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
@@ -125,7 +141,7 @@ func (vec *Vector) nextToken() (*token, error) {
 		vec.t.setlo(vec.pos).sethi(hi)
 		return &vec.t, nil
 	default:
-		if unicode.IsLetter(r) || r == '+' || r == '.' {
+		if unicode.IsDigit(r) || r == '+' || r == '.' {
 			vec.t.typ = tokenNumber
 			hi := vec.readNumber()
 			vec.t.setlo(vec.pos).sethi(hi)
