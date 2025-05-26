@@ -48,3 +48,24 @@ func (vec *Vector) Reset() {
 	vec.col = 0
 	vec.pcol = 0
 }
+
+func (vec *Vector) incp(d int) *Vector {
+	vec.pos += uint64(d)
+	return vec
+}
+
+func (vec *Vector) incc(d int) *Vector {
+	vec.col += uint64(d)
+	return vec
+}
+
+func (vec *Vector) inccp(d int) *Vector {
+	vec.pos += uint64(d)
+	vec.col += uint64(d)
+	return vec
+}
+
+func (vec *Vector) incl(d int) *Vector {
+	vec.line += uint64(d)
+	return vec
+}
