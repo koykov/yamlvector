@@ -67,100 +67,163 @@ func (vec *Vector) nextToken() (*token, error) {
 	if err != nil {
 		return nil, err
 	}
-	vec.pos += uint64(w)
-	switch r {
-	case '-':
+	vec.inccp(w)
+	r1, _, err1 := vec.ReadRuneAt(int(vec.pos))
+	if err1 != nil {
+		return nil, err1
+	}
+	switch {
+	case r == '-' && r1 == ' ':
 		// multiline literal
-		r1, _, err1 := vec.ReadRuneAt(int(vec.pos))
-		if err1 != nil {
-			return nil, err1
-		}
-		if r1 == ' ' {
-			vec.t.typ = tokenDash
-			vec.t.setlo(vec.pos).sethi(vec.pos + 1)
-			vec.pos += 1
-			return &vec.t, nil
-		}
-		if unicode.IsDigit(r1) {
-			vec.t.typ = tokenNumber
-			hi := vec.readNumber()
-			vec.t.setlo(vec.pos).sethi(hi)
-			return &vec.t, nil
-		}
-	case ':':
+		vec.t.typ = tokenDash
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
+		return &vec.t, nil
+	case r == ':':
 		vec.t.typ = tokenColon
 		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
 		return &vec.t, nil
-	case ',':
+	case r == ',':
 		vec.t.typ = tokenComma
 		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
 		return &vec.t, nil
-	case '[':
+	case r == '[':
 		vec.t.typ = tokenLBracket
 		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
 		return &vec.t, nil
-	case ']':
+	case r == ']':
 		vec.t.typ = tokenRBracket
 		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
 		return &vec.t, nil
-	case '{':
+	case r == '{':
 		vec.t.typ = tokenLBrace
 		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
 		return &vec.t, nil
-	case '}':
+	case r == '}':
 		vec.t.typ = tokenRBrace
 		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
 		return &vec.t, nil
-	case '#':
+	case r == '#':
 		vec.t.typ = tokenComment
-		hi := vec.readComment()
+		hi, err2 := vec.readComment()
+		if err2 != nil {
+			return nil, err2
+		}
 		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
-	case '&':
+	case r == '&':
 		vec.t.typ = tokenAnchor
-		hi := vec.readAnchor()
+		hi, err2 := vec.readAnchor()
+		if err2 != nil {
+			return nil, err2
+		}
 		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
-	case '*':
+	case r == '*':
 		vec.t.typ = tokenAlias
 		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
 		return &vec.t, nil
-	case '!':
+	case r == '!':
 		vec.t.typ = tokenTag
-		hi := vec.readTag()
+		hi, err2 := vec.readTag()
+		if err2 != nil {
+			return nil, err2
+		}
 		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
-	case '%':
+	case r == '%':
 		vec.t.typ = tokenDirective
-		hi := vec.readDirective()
+		hi, err2 := vec.readDirective()
+		if err2 != nil {
+			return nil, err2
+		}
 		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
-	case '"', '\'':
+	case r == '"' || r == '\'':
 		vec.t.typ = tokenString
-		hi := vec.readString()
+		hi, err2 := vec.readString()
+		if err2 != nil {
+			return nil, err2
+		}
 		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
+	case unicode.IsDigit(r) || r == '-' || r == '+' || (r == '.' && unicode.IsDigit(r1)):
+		vec.t.typ = tokenNumber
+		hi, err2 := vec.readNumber()
+		if err2 != nil {
+			return nil, err2
+		}
+		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
+		return &vec.t, nil
+	case unicode.IsLetter(r):
+		typ, hi, err2 := vec.readKeyword()
+		if err2 != nil {
+			return nil, err2
+		}
+		vec.t.typ = typ
+		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
+		return &vec.t, nil
+	case r == '\n' || r == '\r' || (r == '\n' && r1 == '\r'):
+		vec.line++
+		vec.col = 0
 	default:
-		if unicode.IsDigit(r) || r == '+' || r == '.' {
-			vec.t.typ = tokenNumber
-			hi := vec.readNumber()
-			vec.t.setlo(vec.pos).sethi(hi)
-			return &vec.t, nil
-		}
-
-		if unicode.IsLetter(r) {
-			typ, hi := vec.readKeyword()
-			vec.t.typ = typ
-			vec.t.setlo(vec.pos).sethi(hi)
-			return &vec.t, nil
-		}
+		return nil, vector.ErrUnexpId
 	}
-	return nil, nil
+	return nil, vector.ErrUnexpId
 }
 
 func (vec *Vector) parseString() error {
 	// todo implement me
 	return nil
+}
+
+func (vec *Vector) readComment() (uint64, error) {
+	// todo implement me
+	return 0, nil
+}
+
+func (vec *Vector) readAnchor() (uint64, error) {
+	// todo implement me
+	return 0, nil
+}
+
+func (vec *Vector) readTag() (uint64, error) {
+	// todo implement me
+	return 0, nil
+}
+
+func (vec *Vector) readDirective() (uint64, error) {
+	// todo implement me
+	return 0, nil
+}
+
+func (vec *Vector) readString() (uint64, error) {
+	// todo implement me
+	return 0, nil
+}
+
+func (vec *Vector) readNumber() (uint64, error) {
+	// todo implement me
+	return 0, nil
+}
+
+func (vec *Vector) readKeyword() (ttoken, uint64, error) {
+	// todo implement me
+	return tokenNull, 0, nil
 }
 
 func (vec *Vector) skipws() error {
@@ -172,7 +235,7 @@ func (vec *Vector) skipws() error {
 		if !unicode.IsSpace(r) {
 			break
 		}
-		vec.pos += uint(w)
+		vec.pos += uint64(w)
 	}
 	return nil
 }
@@ -182,5 +245,5 @@ func (vec *Vector) skipl() {
 	if i < 0 {
 		return
 	}
-	vec.pos += uint(i + 1)
+	vec.pos += uint64(i + 1)
 }
