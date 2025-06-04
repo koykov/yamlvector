@@ -59,7 +59,7 @@ func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error)
 }
 
 func (vec *Vector) nextToken() (*token, error) {
-	if err := vec.skipws(); err != nil {
+	if _, err := vec.skipws(); err != nil {
 		return nil, err
 	}
 
@@ -111,6 +111,9 @@ func (vec *Vector) nextToken() (*token, error) {
 		return &vec.t, nil
 	case r == '#':
 		vec.t.typ = tokenComment
+		if _, err = vec.skipws(); err != nil {
+			return nil, err
+		}
 		hi, err2 := vec.readComment()
 		if err2 != nil {
 			return nil, err2
@@ -224,26 +227,4 @@ func (vec *Vector) readNumber() (uint64, error) {
 func (vec *Vector) readKeyword() (ttoken, uint64, error) {
 	// todo implement me
 	return tokenNull, 0, nil
-}
-
-func (vec *Vector) skipws() error {
-	for {
-		r, w, err := vec.ReadRuneAt(int(vec.pos))
-		if err != nil {
-			return err
-		}
-		if !unicode.IsSpace(r) {
-			break
-		}
-		vec.pos += uint64(w)
-	}
-	return nil
-}
-
-func (vec *Vector) skipl() {
-	i := bytealg.IndexByteAtBytes(vec.Src(), '\n', int(vec.pos))
-	if i < 0 {
-		return
-	}
-	vec.pos += uint64(i + 1)
 }
