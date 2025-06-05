@@ -43,8 +43,26 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 }
 
 func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (_ int, err error) {
-	// todo implement me
-	return offset, err
+	for {
+		t, err := vec.nextToken()
+		if err != nil {
+			return offset, err
+		}
+		switch t.typ {
+		case tokenComment:
+			// do nothing
+		case tokenEOF:
+			return offset, nil
+		case tokenDash:
+			offset, err = vec.parseObject(depth, offset, node)
+		case tokenColon:
+			offset, err = vec.parseArray(depth, offset, node)
+		case tokenComma:
+			offset, err = vec.parseGeneric(depth, offset, node)
+		default:
+			return offset, vector.ErrUnexpId
+		}
+	}
 }
 
 func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error) {
