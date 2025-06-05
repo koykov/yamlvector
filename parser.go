@@ -5,6 +5,7 @@ import (
 	"unicode"
 
 	"github.com/koykov/bytealg"
+	"github.com/koykov/simd/skipline"
 	"github.com/koykov/vector"
 )
 
@@ -195,8 +196,11 @@ func (vec *Vector) parseString() error {
 }
 
 func (vec *Vector) readComment() (uint64, error) {
-	// todo implement me
-	return 0, nil
+	_, i := skipline.Index2(vec.Src()[vec.pos:])
+	vec.pos = vec.pos + uint64(i)
+	vec.line++
+	vec.col = 0
+	return uint64(i), nil
 }
 
 func (vec *Vector) readAnchor() (uint64, error) {
