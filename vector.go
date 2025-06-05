@@ -41,7 +41,6 @@ func NewVector() *Vector {
 
 func (vec *Vector) Reset() {
 	vec.Vector.Reset()
-	vec.init = false
 
 	vec.pos = 0
 	vec.line = 0
