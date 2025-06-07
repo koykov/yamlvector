@@ -214,11 +214,15 @@ func (vec *Vector) parseString() error {
 }
 
 func (vec *Vector) readComment() (uint64, error) {
-	_, i := skipline.Index2(vec.Src()[vec.pos:])
-	vec.pos = vec.pos + uint64(i)
+	b := vec.Src()[vec.pos:]
+	i, j := skipline.Index2(b)
+	if i == -1 {
+		j = len(b)
+	}
+	vec.pos = vec.pos + uint64(j)
 	vec.line++
 	vec.col = 0
-	return uint64(i), nil
+	return uint64(j), nil
 }
 
 func (vec *Vector) readAnchor() (uint64, error) {
