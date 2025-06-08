@@ -82,6 +82,10 @@ func (vec *Vector) nextToken() (*token, error) {
 		return nil, err
 	}
 
+	if vec.pos >= uint64(vec.SrcLen()) {
+		vec.t.typ = tokenEOF
+		return &vec.t, nil
+	}
 	r, w, err := vec.ReadRuneAt(int(vec.pos))
 	if err != nil {
 		return nil, err
@@ -222,7 +226,7 @@ func (vec *Vector) readComment() (uint64, error) {
 	vec.pos = vec.pos + uint64(j)
 	vec.line++
 	vec.col = 0
-	return uint64(j), nil
+	return vec.pos, nil
 }
 
 func (vec *Vector) readAnchor() (uint64, error) {

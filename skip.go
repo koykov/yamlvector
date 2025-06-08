@@ -1,7 +1,7 @@
 package yamlvector
 
 func (vec *Vector) skipws() (c int, err error) {
-	for {
+	for vec.pos < uint64(vec.SrcLen()) {
 		switch vec.SrcAt(int(vec.pos)) {
 		case ' ':
 			vec.pos++
@@ -13,4 +13,5 @@ func (vec *Vector) skipws() (c int, err error) {
 			return
 		}
 	}
+	return
 }
