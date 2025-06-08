@@ -22,59 +22,58 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		return
 	}
 
-	offset := 0
 	// Create root node and register it.
 	root, i := vec.AcquireNodeWithType(0, vector.TypeObject)
 
 	// Parse source data.
-	if offset, err = vec.parseGeneric(0, offset, root); err != nil {
-		vec.SetErrOffset(offset)
+	if err = vec.parseGeneric(0, root); err != nil {
+		vec.SetErrOffset(int(vec.pos))
 		return err
 	}
 	vec.ReleaseNode(i, root)
 
 	// Check unparsed tail.
-	if offset < vec.SrcLen() {
-		vec.SetErrOffset(offset)
+	if vec.pos < uint64(vec.SrcLen()) {
+		vec.SetErrOffset(int(vec.pos))
 		return vector.ErrUnparsedTail
 	}
 
 	return
 }
 
-func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (_ int, err error) {
+func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 	for {
 		t, err := vec.nextToken()
 		if err != nil {
-			return offset, err
+			return err
 		}
 		switch t.typ {
 		case tokenComment:
 			// do nothing
 		case tokenEOF:
-			return offset, nil
+			return nil
 		case tokenDash:
-			offset, err = vec.parseObject(depth, offset, node)
+			err = vec.parseObject(depth, node)
 		case tokenColon:
-			offset, err = vec.parseArray(depth, offset, node)
+			err = vec.parseArray(depth, node)
 		case tokenComma:
-			offset, err = vec.parseGeneric(depth, offset, node)
+			err = vec.parseGeneric(depth, node)
 		default:
-			return offset, vector.ErrUnexpId
+			return vector.ErrUnexpId
 		}
 	}
 }
 
-func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error) {
+func (vec *Vector) parseObject(depth int, node *vector.Node) error {
 	_, _ = depth, node
 	// todo implement me
-	return offset, nil
+	return nil
 }
 
-func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error) {
+func (vec *Vector) parseArray(depth int, node *vector.Node) error {
 	_, _ = depth, node
 	// todo implement me
-	return offset, nil
+	return nil
 }
 
 func (vec *Vector) nextToken() (*token, error) {
