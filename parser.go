@@ -256,18 +256,13 @@ func (vec *Vector) readNumber() (uint64, error) {
 
 func (vec *Vector) readKeyword() (ttoken, uint64, error) {
 	off := vec.pos
-	for i := int(vec.pos); i < vec.SrcLen(); {
-		r, w, err := vec.ReadRuneAt(i)
-		if err != nil {
-			return tokenNull, vec.pos, err
-		}
-		if !unicode.IsLetter(r) {
-			break
-		}
-		vec.pos += uint64(w)
-		i = int(vec.pos)
+	i, j := skipline.Index2(vec.Src()[off:])
+	if i == -1 {
+		i = vec.SrcLen()
+		j = i
 	}
-	v := vec.Src()[off:vec.pos]
+	vec.pos = uint64(j)
+	v := vec.Src()[off:i]
 	switch {
 	case bytes.Equal(v, bnull) || bytes.Equal(v, bNull) || bytes.Equal(v, bNULL), bytes.Equal(v, bNone) || bytes.Equal(v, bTilda):
 		return tokenNull, vec.pos, nil
