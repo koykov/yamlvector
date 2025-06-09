@@ -8,9 +8,9 @@ import (
 
 func TestScalar(t *testing.T) {
 	vec := NewVector()
-	t.Run("comment", func(t *testing.T) {
-		vec = assertParse(t, vec, nil, 0)
-	})
+	// t.Run("comment", func(t *testing.T) {
+	// 	vec = assertParse(t, vec, nil, 0)
+	// })
 	// t.Run("scalar_null", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
 	// 	assertType(t, vec, "", vector.TypeNull)
@@ -48,10 +48,10 @@ func TestScalar(t *testing.T) {
 	// 	assertType(t, vec, "", vector.TypeNumber)
 	// 	assertNumber(t, vec, "", 3.1415)
 	// })
-	// t.Run("scalar_string", func(t *testing.T) {
-	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeString)
-	// })
+	t.Run("scalar_string", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeString)
+	})
 	// t.Run("scalar_string_no_fmt", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
 	// 	assertType(t, vec, "", vector.TypeString)

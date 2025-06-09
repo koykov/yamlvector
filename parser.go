@@ -1,6 +1,7 @@
 package yamlvector
 
 import (
+	"bytes"
 	"errors"
 	"unicode"
 
@@ -254,6 +255,42 @@ func (vec *Vector) readNumber() (uint64, error) {
 }
 
 func (vec *Vector) readKeyword() (ttoken, uint64, error) {
-	// todo implement me
-	return tokenNull, 0, nil
+	off := vec.pos
+	for i := int(vec.pos); i < vec.SrcLen(); {
+		r, w, err := vec.ReadRuneAt(i)
+		if err != nil {
+			return tokenNull, vec.pos, err
+		}
+		if !unicode.IsLetter(r) {
+			break
+		}
+		vec.pos += uint64(w)
+		i = int(vec.pos)
+	}
+	v := vec.Src()[off:vec.pos]
+	switch {
+	case bytes.Equal(v, bnull) || bytes.Equal(v, bNull) || bytes.Equal(v, bNULL), bytes.Equal(v, bNone) || bytes.Equal(v, bTilda):
+		return tokenNull, vec.pos, nil
+	case bytes.Equal(v, btrue) || bytes.Equal(v, bTrue) || bytes.Equal(v, bTRUE) || bytes.Equal(v, bOn),
+		bytes.Equal(v, bfalse) || bytes.Equal(v, bFalse) || bytes.Equal(v, bFALSE) || bytes.Equal(v, bOff):
+		return tokenBool, vec.pos, nil
+	default:
+		return tokenString, vec.pos, nil
+	}
 }
+
+var (
+	bnull  = []byte("null")
+	bNull  = []byte("Null")
+	bNULL  = []byte("NULL")
+	bNone  = []byte("None")
+	bTilda = []byte("~")
+	btrue  = []byte("true")
+	bTrue  = []byte("True")
+	bTRUE  = []byte("TRUE")
+	bfalse = []byte("false")
+	bFalse = []byte("False")
+	bFALSE = []byte("FALSE")
+	bOn    = []byte("On")
+	bOff   = []byte("Off")
+)
