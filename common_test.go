@@ -168,6 +168,12 @@ func assertNumber(tb testing.TB, vec *Vector, path string, val float64) {
 	}
 }
 
+func assertString(tb testing.TB, vec *Vector, path, val string) {
+	if val1 := vec.Dot(path).String(); val1 != val {
+		tb.Error("value mismatch, need", val, "got", val1)
+	}
+}
+
 func bench(b *testing.B, fn func(vec *Vector)) {
 	key := getTBName(b)
 	st := getStage(key)
