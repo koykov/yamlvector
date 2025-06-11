@@ -43,7 +43,9 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 }
 
 func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
+	srcp := vec.SrcAddr()
 	for {
+		off := vec.pos
 		t, err := vec.nextToken()
 		if err != nil {
 			return err
@@ -59,6 +61,9 @@ func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 			err = vec.parseArray(depth, node)
 		case tokenComma:
 			err = vec.parseGeneric(depth, node)
+		case tokenString:
+			node.SetType(vector.TypeString)
+			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(off)).SetLen(int(vec.pos))
 		default:
 			return vector.ErrUnexpId
 		}
