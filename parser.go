@@ -3,6 +3,7 @@ package yamlvector
 import (
 	"bytes"
 	"errors"
+	"io"
 	"unicode"
 
 	"github.com/koykov/bytealg"
@@ -98,7 +99,7 @@ func (vec *Vector) nextToken() (*token, error) {
 	}
 	vec.inccp(w)
 	r1, _, err1 := vec.ReadRuneAt(int(vec.pos))
-	if err1 != nil {
+	if err1 != nil && err1 != io.ErrUnexpectedEOF {
 		return nil, err1
 	}
 	switch {
@@ -200,7 +201,7 @@ func (vec *Vector) nextToken() (*token, error) {
 		vec.t.setlo(vec.pos).sethi(hi)
 		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
-	case unicode.IsLetter(r):
+	case unicode.IsLetter(r) || r == '~':
 		vec.pos--
 		off := vec.pos
 		typ, hi, err2 := vec.readKeyword()

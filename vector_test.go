@@ -11,14 +11,14 @@ func TestScalar(t *testing.T) {
 	// t.Run("comment", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
 	// })
-	t.Run("scalar_null", func(t *testing.T) {
-		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeNull)
-	})
-	// t.Run("scalar_null_canonical", func(t *testing.T) {
+	// t.Run("scalar_null", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
 	// 	assertType(t, vec, "", vector.TypeNull)
 	// })
+	t.Run("scalar_null_canonical", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNull)
+	})
 	// t.Run("scalar_null_none", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
 	// 	assertType(t, vec, "", vector.TypeNull)
