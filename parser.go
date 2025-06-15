@@ -45,7 +45,6 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 	srcp := vec.SrcAddr()
 	for {
-		off := vec.pos
 		t, err := vec.nextToken()
 		if err != nil {
 			return err
@@ -63,7 +62,7 @@ func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 			err = vec.parseGeneric(depth, node)
 		case tokenString:
 			node.SetType(vector.TypeString)
-			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(off)).SetLen(int(vec.pos))
+			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(vec.t.hi))
 		default:
 			return vector.ErrUnexpId
 		}
@@ -200,12 +199,14 @@ func (vec *Vector) nextToken() (*token, error) {
 		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
 	case unicode.IsLetter(r):
+		vec.pos--
+		off := vec.pos
 		typ, hi, err2 := vec.readKeyword()
 		if err2 != nil {
 			return nil, err2
 		}
 		vec.t.typ = typ
-		vec.t.setlo(vec.pos).sethi(hi)
+		vec.t.setlo(off).sethi(hi)
 		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
 	case r == '\n' || r == '\r' || (r == '\n' && r1 == '\r'):
