@@ -66,6 +66,10 @@ func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(vec.t.hi))
 		case tokenNull:
 			node.SetType(vector.TypeNull)
+		case tokenBool:
+			node.SetType(vector.TypeBool)
+			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(vec.t.hi)).
+				SetBit(vector.FlagExtraBool, true)
 		default:
 			return vector.ErrUnexpId
 		}

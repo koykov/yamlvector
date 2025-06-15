@@ -11,41 +11,46 @@ func TestScalar(t *testing.T) {
 	// t.Run("comment", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
 	// })
-	t.Run("scalar_null", func(t *testing.T) {
-		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeNull)
-	})
-	t.Run("scalar_Null", func(t *testing.T) {
-		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeNull)
-	})
-	t.Run("scalar_NULL", func(t *testing.T) {
-		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeNull)
-	})
-	t.Run("scalar_null_canonical", func(t *testing.T) {
-		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeNull)
-	})
-	t.Run("scalar_null_none", func(t *testing.T) {
-		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeNull)
-	})
-	// t.Run("scalar_bool", func(t *testing.T) {
+	// t.Run("scalar_null", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeBool)
-	// 	assertBool(t, vec, "", true)
+	// 	assertType(t, vec, "", vector.TypeNull)
 	// })
-	// t.Run("scalar_bool_low", func(t *testing.T) {
+	// t.Run("scalar_Null", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeBool)
-	// 	assertBool(t, vec, "", false)
+	// 	assertType(t, vec, "", vector.TypeNull)
 	// })
-	// t.Run("scalar_bool_on", func(t *testing.T) {
+	// t.Run("scalar_NULL", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeBool)
-	// 	assertBool(t, vec, "", true)
+	// 	assertType(t, vec, "", vector.TypeNull)
 	// })
+	// t.Run("scalar_null_canonical", func(t *testing.T) {
+	// 	vec = assertParse(t, vec, nil, 0)
+	// 	assertType(t, vec, "", vector.TypeNull)
+	// })
+	// t.Run("scalar_null_none", func(t *testing.T) {
+	// 	vec = assertParse(t, vec, nil, 0)
+	// 	assertType(t, vec, "", vector.TypeNull)
+	// })
+	t.Run("scalar_bool", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeBool)
+		assertBool(t, vec, "", true)
+	})
+	t.Run("scalar_Bool", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeBool)
+		assertBool(t, vec, "", true)
+	})
+	t.Run("scalar_BOOL", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeBool)
+		assertBool(t, vec, "", false)
+	})
+	t.Run("scalar_bool_on", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeBool)
+		assertBool(t, vec, "", true)
+	})
 	// t.Run("scalar_number", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
 	// 	assertType(t, vec, "", vector.TypeNumber)
