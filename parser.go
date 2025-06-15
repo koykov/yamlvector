@@ -63,6 +63,8 @@ func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 		case tokenString:
 			node.SetType(vector.TypeString)
 			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(vec.t.hi))
+		case tokenNull:
+			node.SetType(vector.TypeNull)
 		default:
 			return vector.ErrUnexpId
 		}
