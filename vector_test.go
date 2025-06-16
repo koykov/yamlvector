@@ -8,29 +8,29 @@ import (
 
 func TestScalar(t *testing.T) {
 	vec := NewVector()
-	// t.Run("comment", func(t *testing.T) {
-	// 	vec = assertParse(t, vec, nil, 0)
-	// })
-	// t.Run("scalar_null", func(t *testing.T) {
-	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeNull)
-	// })
-	// t.Run("scalar_Null", func(t *testing.T) {
-	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeNull)
-	// })
-	// t.Run("scalar_NULL", func(t *testing.T) {
-	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeNull)
-	// })
-	// t.Run("scalar_null_canonical", func(t *testing.T) {
-	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeNull)
-	// })
-	// t.Run("scalar_null_none", func(t *testing.T) {
-	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeNull)
-	// })
+	t.Run("comment", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+	})
+	t.Run("scalar_null", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNull)
+	})
+	t.Run("scalar_Null", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNull)
+	})
+	t.Run("scalar_NULL", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNull)
+	})
+	t.Run("scalar_null_canonical", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNull)
+	})
+	t.Run("scalar_null_none", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNull)
+	})
 	t.Run("scalar_bool", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
 		assertType(t, vec, "", vector.TypeBool)
@@ -74,10 +74,10 @@ func TestScalar(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
 	// 	assertType(t, vec, "", vector.TypeString)
 	// })
-	// t.Run("scalar_string_escape", func(t *testing.T) {
-	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeString)
-	// })
+	t.Run("scalar_string_escape", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeString)
+	})
 }
 
 func TestObject(t *testing.T) {
