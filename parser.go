@@ -63,12 +63,12 @@ func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 			err = vec.parseGeneric(depth, node)
 		case tokenString:
 			node.SetType(vector.TypeString)
-			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(vec.t.hi))
+			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(t.hi - t.lo))
 		case tokenNull:
 			node.SetType(vector.TypeNull)
 		case tokenBool:
 			node.SetType(vector.TypeBool)
-			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(vec.t.hi)).
+			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(t.hi-t.lo)).
 				SetBit(vector.FlagExtraBool, true)
 		default:
 			return vector.ErrUnexpId
@@ -189,12 +189,12 @@ func (vec *Vector) nextToken() (*token, error) {
 		return &vec.t, nil
 	case r == '"' || r == '\'':
 		vec.t.typ = tokenString
-		hi, err2 := vec.readString()
+		lo := vec.pos
+		hi, err2 := vec.readString(byte(r))
 		if err2 != nil {
 			return nil, err2
 		}
-		vec.t.setlo(vec.pos).sethi(hi)
-		vec.inccp(int(hi - vec.pos))
+		vec.t.setlo(lo).sethi(hi)
 		return &vec.t, nil
 	case unicode.IsDigit(r) || r == '-' || r == '+' || (r == '.' && unicode.IsDigit(r1)):
 		vec.t.typ = tokenNumber
@@ -257,9 +257,29 @@ func (vec *Vector) readDirective() (uint64, error) {
 	return 0, nil
 }
 
-func (vec *Vector) readString() (uint64, error) {
-	// todo implement me
-	return 0, nil
+func (vec *Vector) readString(b byte) (uint64, error) {
+	p := vec.Src()
+	i := bytealg.IndexByteAtBytes(p, b, int(vec.pos+1))
+	if i < 0 {
+		return 0, vector.ErrUnexpEOF
+	}
+	if p[i-1] != '\\' {
+		vec.pos = uint64(i + 1)
+		return uint64(i), nil
+	} else {
+		for j := i; j < len(p); {
+			j = bytealg.IndexByteAtBytes(p, b, j+1)
+			if i < 0 {
+				return 0, vector.ErrUnexpEOF
+			}
+			i = j
+			if p[j-1] != '\\' {
+				break
+			}
+		}
+	}
+	vec.pos = uint64(i + 1)
+	return vec.pos - 1, nil
 }
 
 func (vec *Vector) readNumber() (uint64, error) {
