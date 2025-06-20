@@ -66,10 +66,10 @@ func TestScalar(t *testing.T) {
 		assertType(t, vec, "", vector.TypeString)
 		assertString(t, vec, "", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eu magna nec felis ullamcorper blandit. Aliquam laoreet sodales massa sit amet porta. Cras mattis ornare faucibus.")
 	})
-	// t.Run("scalar_string_no_fmt", func(t *testing.T) {
-	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeString)
-	// })
+	t.Run("scalar_string_folded_block", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeString)
+	})
 	// t.Run("scalar_string_keep_fmt", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
 	// 	assertType(t, vec, "", vector.TypeString)
