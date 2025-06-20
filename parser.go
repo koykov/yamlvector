@@ -219,7 +219,7 @@ func (vec *Vector) nextToken() (*token, error) {
 	case r == '>':
 		// todo skip modifiers
 		// todo skip NL
-	case r == '\n' || r == '\r' || (r == '\n' && r1 == '\r'):
+	case r == '\r' || (r == '\n' && r1 == '\r'):
 		vec.line++
 		vec.col = 0
 	default:
