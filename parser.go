@@ -217,8 +217,13 @@ func (vec *Vector) nextToken() (*token, error) {
 		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
 	case r == '>':
-		// todo skip modifiers
-		// todo skip NL
+		off := vec.pos
+		i, j := skipline.Index2(vec.Src()[off:])
+		if i == -1 {
+			return nil, vector.ErrUnexpId
+		}
+		off = uint64(j)
+		// todo read line by line with the same indent
 	case r == '\r' || (r == '\n' && r1 == '\r'):
 		vec.line++
 		vec.col = 0
