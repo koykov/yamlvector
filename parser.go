@@ -217,12 +217,45 @@ func (vec *Vector) nextToken() (*token, error) {
 		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
 	case r == '>':
+		vec.t.typ = tokenString
 		off := vec.pos
 		i, j := skipline.Index2(vec.Src()[off:])
 		if i == -1 {
 			return nil, vector.ErrUnexpId
 		}
-		off = uint64(j)
+		vec.pos = off + uint64(j)
+		off = vec.pos
+		eow, err := vec.skipws()
+		if err != nil {
+			return nil, err
+		}
+		pad := uint64(eow)
+		for {
+			i, j = skipline.Index2(vec.Src()[vec.pos:])
+			if i == -1 {
+				vec.pos = uint64(vec.SrcLen())
+				break
+			}
+			vec.pos += uint64(j)
+			if c := vec.SrcAt(int(vec.pos)); c == '\n' || c == 'r' {
+				vec.pos++
+				continue
+			}
+			vec.Src()[vec.pos-1] = ' '
+			vec.pos += uint64(j)
+			if eow, err = vec.skipws(); err != nil {
+				return nil, err
+			}
+			pad1 := uint64(eow)
+			if pad1 > pad {
+				return nil, ErrBadIndent
+			}
+			if pad1 < pad || vec.pos == uint64(vec.SrcLen()) {
+				break
+			}
+		}
+		vec.t.setlo(off).sethi(vec.pos)
+		return &vec.t, nil
 		// todo read line by line with the same indent
 	case r == '\r' || (r == '\n' && r1 == '\r'):
 		vec.line++
