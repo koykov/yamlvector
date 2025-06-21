@@ -236,13 +236,12 @@ func (vec *Vector) nextToken() (*token, error) {
 				vec.pos = uint64(vec.SrcLen())
 				break
 			}
-			vec.pos += uint64(j)
 			if c := vec.SrcAt(int(vec.pos)); c == '\n' || c == 'r' {
 				vec.pos++
 				continue
 			}
-			vec.Src()[vec.pos-1] = ' '
 			vec.pos += uint64(j)
+			vec.Src()[vec.pos-1] = ' '
 			if eow, err = vec.skipws(); err != nil {
 				return nil, err
 			}
