@@ -216,7 +216,7 @@ func (vec *Vector) nextToken() (*token, error) {
 		vec.t.setlo(off).sethi(hi)
 		vec.inccp(int(hi - vec.pos))
 		return &vec.t, nil
-	case r == '>':
+	case r == '>' || r == '|':
 		vec.t.typ = tokenString
 		off := vec.pos
 		i, j := skipline.Index2(vec.Src()[off:])
@@ -241,7 +241,9 @@ func (vec *Vector) nextToken() (*token, error) {
 				continue
 			}
 			vec.pos += uint64(j)
-			vec.Src()[vec.pos-1] = ' '
+			if r == '>' {
+				vec.Src()[vec.pos-1] = ' '
+			}
 			if eow, err = vec.skipws(); err != nil {
 				return nil, err
 			}
@@ -255,7 +257,6 @@ func (vec *Vector) nextToken() (*token, error) {
 		}
 		vec.t.setlo(off).sethi(vec.pos)
 		return &vec.t, nil
-		// todo read line by line with the same indent
 	case r == '\r' || (r == '\n' && r1 == '\r'):
 		vec.line++
 		vec.col = 0

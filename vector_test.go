@@ -71,10 +71,11 @@ func TestScalar(t *testing.T) {
 		assertType(t, vec, "", vector.TypeString)
 		assertString(t, vec, "", "Wrapped text will be folded into a single paragraph \nBlank lines denote paragraph breaks")
 	})
-	// t.Run("scalar_string_keep_fmt", func(t *testing.T) {
-	// 	vec = assertParse(t, vec, nil, 0)
-	// 	assertType(t, vec, "", vector.TypeString)
-	// })
+	t.Run("scalar_string_literal_block", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeString)
+		assertString(t, vec, "", "There was a young fellow of Warwick\nWho had reason for feeling euphoric\nFor he could, by election\nHave triune erection\nIonic, Corinthian, and Doric")
+	})
 	t.Run("scalar_string_escape", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
 		assertType(t, vec, "", vector.TypeString)
