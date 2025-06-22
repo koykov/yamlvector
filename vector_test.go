@@ -69,7 +69,7 @@ func TestScalar(t *testing.T) {
 	t.Run("scalar_string_folded_block", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
 		assertType(t, vec, "", vector.TypeString)
-		assertString(t, vec, "", "Wrapped text will be folded into a single paragraph\nBlank lines denote paragraph breaks")
+		assertString(t, vec, "", "Wrapped text will be folded into a single paragraph \nBlank lines denote paragraph breaks")
 	})
 	// t.Run("scalar_string_keep_fmt", func(t *testing.T) {
 	// 	vec = assertParse(t, vec, nil, 0)
