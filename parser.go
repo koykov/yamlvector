@@ -1,15 +1,17 @@
 package yamlvector
 
 import (
+	"bytes"
 	"errors"
+	"io"
+	"unicode"
 
 	"github.com/koykov/bytealg"
+	"github.com/koykov/simd/skipline"
 	"github.com/koykov/vector"
 )
 
 var errBadInit = errors.New("bad vector initialization, use yamlvector.NewVector() or yamlvector.Acquire()")
-
-var bBools = []byte("truefalse")
 
 func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	if !vec.init {
@@ -22,159 +24,342 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		return
 	}
 
-	offset := 0
 	// Create root node and register it.
 	root, i := vec.AcquireNodeWithType(0, vector.TypeObject)
 
 	// Parse source data.
-	if offset, err = vec.parseGeneric(0, offset, root); err != nil {
-		vec.SetErrOffset(offset)
+	if err = vec.parseGeneric(0, root); err != nil {
+		vec.SetErrOffset(int(vec.pos))
 		return err
 	}
 	vec.ReleaseNode(i, root)
 
 	// Check unparsed tail.
-	if offset < vec.SrcLen() {
-		vec.SetErrOffset(offset)
+	if vec.pos < uint64(vec.SrcLen()) {
+		vec.SetErrOffset(int(vec.pos))
 		return vector.ErrUnparsedTail
 	}
 
 	return
 }
 
-func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, error) {
-	var err error
-	node.SetOffset(vec.Index.Len(depth))
-	src := vec.Src()
-	// srcp := vec.SrcAddr()
-	n := len(src)
-	_ = src[n-1]
+func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
+	srcp := vec.SrcAddr()
+	for {
+		t, err := vec.nextToken()
+		if err != nil {
+			return err
+		}
+		switch t.typ {
+		case tokenComment:
+			// do nothing
+		case tokenEOF:
+			return nil
+		case tokenDash:
+			err = vec.parseObject(depth, node)
+		case tokenColon:
+			err = vec.parseArray(depth, node)
+		case tokenComma:
+			err = vec.parseGeneric(depth, node)
+		case tokenString:
+			node.SetType(vector.TypeString)
+			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(t.hi - t.lo))
+		case tokenNull:
+			node.SetType(vector.TypeNull)
+		case tokenBool:
+			node.SetType(vector.TypeBool)
+			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(t.hi-t.lo)).
+				SetBit(vector.FlagExtraBool, true)
+		default:
+			return vector.ErrUnexpId
+		}
+	}
+}
 
-	for offset < n {
-		var ind indent
-		ind, vec.indw = vec.indentDW(src, offset, n)
-		if ind == indentUp {
-			return offset, nil
-		}
-		if src[offset+vec.indw] == '\t' {
-			return offset, ErrBadIndent
-		}
+func (vec *Vector) parseObject(depth int, node *vector.Node) error {
+	_, _ = depth, node
+	// todo implement me
+	return nil
+}
 
-		if src[offset] == '-' {
-			// todo parse array
-		}
-		p, sc, eof := scanl(src, n, offset)
-		_, _ = sc, eof
-		if sc != -1 {
-			// todo parse object
-		} else if c := src[offset]; c == '"' || c == '\'' {
-			// todo parse string
-		} else {
-			l := src[offset:p]
-			_ = l
-			switch {
-			// todo check null/bool/digit
-			}
-		}
+func (vec *Vector) parseArray(depth int, node *vector.Node) error {
+	_, _ = depth, node
+	// todo implement me
+	return nil
+}
 
-		offset += vec.indw
+func (vec *Vector) nextToken() (*token, error) {
+	if _, err := vec.skipws(); err != nil {
+		return nil, err
 	}
 
-	return offset, err
-}
-
-func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error) {
-	_, _ = depth, node
-	// todo implement me
-	return offset, nil
-}
-
-func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error) {
-	_, _ = depth, node
-	// todo implement me
-	return offset, nil
-}
-
-func (vec *Vector) parseGeneric1(depth, offset int, node *vector.Node) (int, error) {
-	var err error
-	node.SetOffset(vec.Index.Len(depth))
-	src := vec.Src()
-	srcp := vec.SrcAddr()
-	n := len(src)
-	_ = src[n-1]
-
-	var (
-		typ vector.Type
-		bv  bool
-	)
-
+	if vec.pos >= uint64(vec.SrcLen()) {
+		vec.t.typ = tokenEOF
+		return &vec.t, nil
+	}
+	r, w, err := vec.ReadRuneAt(int(vec.pos))
+	if err != nil {
+		return nil, err
+	}
+	vec.inccp(w)
+	r1, _, err1 := vec.ReadRuneAt(int(vec.pos))
+	if err1 != nil && err1 != io.ErrUnexpectedEOF {
+		return nil, err1
+	}
 	switch {
-	case ensureNullOrBool(src, &offset, &typ, &bv):
-		node.SetType(typ)
-		if typ == vector.TypeBool {
-			if bv {
-				node.Value().Init(bBools, 0, 4)
-			} else {
-				node.Value().Init(bBools, 4, 5)
-			}
+	case r == '-' && r1 == ' ':
+		// multiline literal
+		vec.t.typ = tokenDash
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
+		return &vec.t, nil
+	case r == ':':
+		vec.t.typ = tokenColon
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
+		return &vec.t, nil
+	case r == ',':
+		vec.t.typ = tokenComma
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
+		return &vec.t, nil
+	case r == '[':
+		vec.t.typ = tokenLBracket
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
+		return &vec.t, nil
+	case r == ']':
+		vec.t.typ = tokenRBracket
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
+		return &vec.t, nil
+	case r == '{':
+		vec.t.typ = tokenLBrace
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
+		return &vec.t, nil
+	case r == '}':
+		vec.t.typ = tokenRBrace
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
+		return &vec.t, nil
+	case r == '#':
+		vec.t.typ = tokenComment
+		if _, err = vec.skipws(); err != nil {
+			return nil, err
 		}
-	case ensureDigit(src[offset]):
-		i := offset
-		for ensureDigit(src[i]) {
-			i++
-			if i == n {
+		hi, err2 := vec.readComment()
+		if err2 != nil {
+			return nil, err2
+		}
+		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
+		return &vec.t, nil
+	case r == '&':
+		vec.t.typ = tokenAnchor
+		hi, err2 := vec.readAnchor()
+		if err2 != nil {
+			return nil, err2
+		}
+		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
+		return &vec.t, nil
+	case r == '*':
+		vec.t.typ = tokenAlias
+		vec.t.setlo(vec.pos).sethi(vec.pos + 1)
+		vec.inccp(1)
+		return &vec.t, nil
+	case r == '!':
+		vec.t.typ = tokenTag
+		hi, err2 := vec.readTag()
+		if err2 != nil {
+			return nil, err2
+		}
+		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
+		return &vec.t, nil
+	case r == '%':
+		vec.t.typ = tokenDirective
+		hi, err2 := vec.readDirective()
+		if err2 != nil {
+			return nil, err2
+		}
+		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
+		return &vec.t, nil
+	case r == '"' || r == '\'':
+		vec.t.typ = tokenString
+		lo := vec.pos
+		hi, err2 := vec.readString(byte(r))
+		if err2 != nil {
+			return nil, err2
+		}
+		vec.t.setlo(lo).sethi(hi)
+		return &vec.t, nil
+	case unicode.IsDigit(r) || r == '-' || r == '+' || (r == '.' && unicode.IsDigit(r1)):
+		vec.t.typ = tokenNumber
+		hi, err2 := vec.readNumber()
+		if err2 != nil {
+			return nil, err2
+		}
+		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
+		return &vec.t, nil
+	case unicode.IsLetter(r) || r == '~':
+		vec.pos--
+		off := vec.pos
+		typ, hi, err2 := vec.readKeyword()
+		if err2 != nil {
+			return nil, err2
+		}
+		vec.t.typ = typ
+		vec.t.setlo(off).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
+		return &vec.t, nil
+	case r == '>' || r == '|':
+		vec.t.typ = tokenString
+		off := vec.pos
+		i, j := skipline.Index2(vec.Src()[off:])
+		if i == -1 {
+			return nil, vector.ErrUnexpId
+		}
+		vec.pos = off + uint64(j)
+		off = vec.pos
+		eow, err := vec.skipws()
+		if err != nil {
+			return nil, err
+		}
+		pad := uint64(eow)
+		for {
+			i, j = skipline.Index2(vec.Src()[vec.pos:])
+			if i == -1 {
+				vec.pos = uint64(vec.SrcLen())
+				break
+			}
+			if c := vec.SrcAt(int(vec.pos)); c == '\n' || c == 'r' {
+				vec.pos++
+				continue
+			}
+			vec.pos += uint64(j)
+			if r == '>' {
+				vec.Src()[vec.pos-1] = ' '
+			}
+			if eow, err = vec.skipws(); err != nil {
+				return nil, err
+			}
+			pad1 := uint64(eow)
+			if pad1 > pad {
+				return nil, ErrBadIndent
+			}
+			if pad1 < pad || vec.pos == uint64(vec.SrcLen()) {
 				break
 			}
 		}
-		node.SetType(vector.TypeNumber)
-		node.Value().InitRaw(srcp, offset, i-offset)
-		offset = i
-	case src[offset] == '"':
-		// escaped string
-		node.SetType(vector.TypeStr)
-		node.Value().SetAddr(srcp, n).SetOffset(offset + 1)
-		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
-		if e < 0 {
-			return n, vector.ErrUnexpEOS
-		}
-		node.Value().SetBit(flagEscapedString, true) // Always mark string as escaped to avoid double indexing.
-		if src[e-1] != '\\' {
-			node.Value().SetLen(e - offset - 1)
-			offset = e + 1
-		} else {
-			for i := e; i < n; {
-				i = bytealg.IndexByteAtBytes(src, '"', i+1)
-				if i < 0 {
-					e = n - 1
-					break
-				}
-				e = i
-				if src[e-1] != '\\' {
-					break
-				}
-			}
-			node.Value().SetLen(e - offset - 1)
-			offset = e + 1
-		}
-	case src[offset] == '|':
-		// string block
-		i := eot(src, offset)
-		node.SetType(vector.TypeString)
-		node.Value().InitRaw(srcp, offset, i-offset)
-		offset = i
-	case src[offset] == '>':
-		// foldable string block
-		i := eot(src, offset)
-		node.SetType(vector.TypeString)
-		node.Value().InitRaw(srcp, offset, i-offset).
-			SetBit(flagFoldBlock, true)
-		offset = i
+		vec.t.setlo(off).sethi(vec.pos)
+		return &vec.t, nil
+	case r == '\r' || (r == '\n' && r1 == '\r'):
+		vec.line++
+		vec.col = 0
 	default:
-		// raw string case
-		i := eol(src, offset)
-		node.SetType(vector.TypeString)
-		node.Value().InitRaw(srcp, offset, i-offset)
-		offset = i
+		return nil, vector.ErrUnexpId
 	}
-	return offset, err
+	return nil, vector.ErrUnexpId
 }
+
+func (vec *Vector) parseString() error {
+	// todo implement me
+	return nil
+}
+
+func (vec *Vector) readComment() (uint64, error) {
+	b := vec.Src()[vec.pos:]
+	i, j := skipline.Index2(b)
+	if i == -1 {
+		j = len(b)
+	}
+	vec.pos = vec.pos + uint64(j)
+	vec.line++
+	vec.col = 0
+	return vec.pos, nil
+}
+
+func (vec *Vector) readAnchor() (uint64, error) {
+	// todo implement me
+	return 0, nil
+}
+
+func (vec *Vector) readTag() (uint64, error) {
+	// todo implement me
+	return 0, nil
+}
+
+func (vec *Vector) readDirective() (uint64, error) {
+	// todo implement me
+	return 0, nil
+}
+
+func (vec *Vector) readString(b byte) (uint64, error) {
+	p := vec.Src()
+	i := bytealg.IndexByteAtBytes(p, b, int(vec.pos+1))
+	if i < 0 {
+		return 0, vector.ErrUnexpEOF
+	}
+	if p[i-1] != '\\' {
+		vec.pos = uint64(i + 1)
+		return uint64(i), nil
+	} else {
+		for j := i; j < len(p); {
+			j = bytealg.IndexByteAtBytes(p, b, j+1)
+			if i < 0 {
+				return 0, vector.ErrUnexpEOF
+			}
+			i = j
+			if p[j-1] != '\\' {
+				break
+			}
+		}
+	}
+	vec.pos = uint64(i + 1)
+	return vec.pos - 1, nil
+}
+
+func (vec *Vector) readNumber() (uint64, error) {
+	// todo implement me
+	return 0, nil
+}
+
+func (vec *Vector) readKeyword() (ttoken, uint64, error) {
+	off := vec.pos
+	i, j := skipline.Index2(vec.Src()[off:])
+	if i == -1 {
+		i = vec.SrcLen()
+		j = i
+	}
+	vec.pos = uint64(j)
+	v := vec.Src()[off:i]
+	switch {
+	case bytes.Equal(v, bnull) || bytes.Equal(v, bNull) || bytes.Equal(v, bNULL), bytes.Equal(v, bNone) || bytes.Equal(v, bTilda):
+		return tokenNull, vec.pos, nil
+	case bytes.Equal(v, btrue) || bytes.Equal(v, bTrue) || bytes.Equal(v, bTRUE) || bytes.Equal(v, bOn),
+		bytes.Equal(v, bfalse) || bytes.Equal(v, bFalse) || bytes.Equal(v, bFALSE) || bytes.Equal(v, bOff):
+		return tokenBool, vec.pos, nil
+	default:
+		return tokenString, vec.pos, nil
+	}
+}
+
+var (
+	bnull  = []byte("null")
+	bNull  = []byte("Null")
+	bNULL  = []byte("NULL")
+	bNone  = []byte("None")
+	bTilda = []byte("~")
+	btrue  = []byte("true")
+	bTrue  = []byte("True")
+	bTRUE  = []byte("TRUE")
+	bfalse = []byte("false")
+	bFalse = []byte("False")
+	bFALSE = []byte("FALSE")
+	bOn    = []byte("On")
+	bOff   = []byte("Off")
+)

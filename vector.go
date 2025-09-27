@@ -8,11 +8,12 @@ import (
 type Vector struct {
 	vector.Vector
 	init bool
-	indw int
-	ind  int
-	inds indent
 
-	lineFC, isFold, isLit, IsRawFold bool
+	t    token
+	pos  uint64
+	line uint64
+	col  uint64
+	pcol uint64
 }
 
 func (vec *Vector) Parse(s []byte) error {
@@ -40,32 +41,30 @@ func NewVector() *Vector {
 
 func (vec *Vector) Reset() {
 	vec.Vector.Reset()
-	vec.init = false
-	vec.indw = 0
-	vec.ind = 0
-	vec.lineFC = false
-	vec.isFold = false
-	vec.isLit = false
-	vec.IsRawFold = false
+
+	vec.pos = 0
+	vec.line = 0
+	vec.col = 0
+	vec.pcol = 0
 }
 
-func (vec *Vector) isDoc() bool {
-	return vec.isFold || vec.isLit || vec.IsRawFold
+func (vec *Vector) incp(d int) *Vector {
+	vec.pos += uint64(d)
+	return vec
 }
 
-func (vec *Vector) indent(r rune) {
-	if vec.lineFC && (r == '\n' || r == '\r') && vec.isDoc() {
-		return
-	}
-	if vec.lineFC && r == ' ' {
-		vec.ind++
-		return
-	}
-	if !vec.lineFC {
-		vec.inds = indentEqual
-		return
-	}
-	// todo update indent level
-	// todo update indent state
-	vec.lineFC = false
+func (vec *Vector) incc(d int) *Vector {
+	vec.col += uint64(d)
+	return vec
+}
+
+func (vec *Vector) inccp(d int) *Vector {
+	vec.pos += uint64(d)
+	vec.col += uint64(d)
+	return vec
+}
+
+func (vec *Vector) incl(d int) *Vector {
+	vec.line += uint64(d)
+	return vec
 }
