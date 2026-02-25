@@ -64,6 +64,9 @@ func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 		case tokenString:
 			node.SetType(vector.TypeString)
 			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(t.hi - t.lo))
+		case tokenNumber:
+			node.SetType(vector.TypeNumber)
+			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(t.hi - t.lo))
 		case tokenNull:
 			node.SetType(vector.TypeNull)
 		case tokenBool:
@@ -324,7 +327,18 @@ func (vec *Vector) readString(b byte) (uint64, error) {
 }
 
 func (vec *Vector) readNumber() (uint64, error) {
-	// todo implement me
+	p := vec.Src()
+	pl := uint64(len(p))
+	var i uint64
+	vec.pos--
+	for i = vec.pos; i < pl; i++ {
+		if !unicode.IsDigit(rune(p[i])) {
+			return i, nil
+		}
+	}
+	if i == pl {
+		return pl, nil
+	}
 	return 0, nil
 }
 
