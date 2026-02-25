@@ -201,12 +201,15 @@ func (vec *Vector) nextToken() (*token, error) {
 		return &vec.t, nil
 	case unicode.IsDigit(r) || r == '-' || r == '+' || (r == '.' && unicode.IsDigit(r1)):
 		vec.t.typ = tokenNumber
-		hi, err2 := vec.readNumber()
+		hi, nan, err2 := vec.readNumber()
 		if err2 != nil {
 			return nil, err2
 		}
 		vec.t.setlo(vec.pos).sethi(hi)
 		vec.inccp(int(hi - vec.pos))
+		if nan {
+			vec.t.typ = tokenString
+		}
 		return &vec.t, nil
 	case unicode.IsLetter(r) || r == '~':
 		vec.pos--
@@ -326,20 +329,25 @@ func (vec *Vector) readString(b byte) (uint64, error) {
 	return vec.pos - 1, nil
 }
 
-func (vec *Vector) readNumber() (uint64, error) {
+func (vec *Vector) readNumber() (uint64, bool, error) {
 	p := vec.Src()
 	pl := uint64(len(p))
 	var i uint64
 	vec.pos--
 	for i = vec.pos; i < pl; i++ {
-		if !unicode.IsDigit(rune(p[i])) {
-			return i, nil
+		if !unicode.IsDigit(rune(p[i])) && p[i] != '.' && p[i] != 'e' && p[i] != 'E' {
+			j := bytealg.IndexByteAtBytes(p, '\n', int(i))
+			if j < 0 {
+				j = int(pl)
+			}
+			i = uint64(j)
+			return i, true, nil
 		}
 	}
 	if i == pl {
-		return pl, nil
+		return pl, false, nil
 	}
-	return 0, nil
+	return i, false, nil
 }
 
 func (vec *Vector) readKeyword() (ttoken, uint64, error) {
