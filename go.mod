@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/koykov/bytealg v1.0.7
 	github.com/koykov/byteconv v1.0.1
-	github.com/koykov/simd v0.0.9
+	github.com/koykov/simd v0.0.10
 	github.com/koykov/vector v1.2.9
 )
 
