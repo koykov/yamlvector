@@ -66,6 +66,11 @@ func TestScalar(t *testing.T) {
 		assertType(t, vec, "", vector.TypeNumber)
 		assertNumber(t, vec, "", 1200000000)
 	})
+	t.Run("scalar_number_exponential_neg", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNumber)
+		assertNumber(t, vec, "", -0.00000314)
+	})
 	t.Run("scalar_number_fake", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
 		assertType(t, vec, "", vector.TypeString)
