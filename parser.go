@@ -335,7 +335,7 @@ func (vec *Vector) readNumber() (uint64, bool, error) {
 	var i uint64
 	vec.pos--
 	for i = vec.pos; i < pl; i++ {
-		if !unicode.IsDigit(rune(p[i])) && p[i] != '.' && p[i] != 'e' && p[i] != 'E' {
+		if !unicode.IsDigit(rune(p[i])) && p[i] != '.' && p[i] != 'e' && p[i] != 'E' && p[i] != '-' && p[i] != '+' {
 			j := bytealg.IndexByteAtBytes(p, '\n', int(i))
 			if j < 0 {
 				j = int(pl)
