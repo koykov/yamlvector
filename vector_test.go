@@ -61,6 +61,11 @@ func TestScalar(t *testing.T) {
 		assertType(t, vec, "", vector.TypeNumber)
 		assertNumber(t, vec, "", 3.1415)
 	})
+	t.Run("scalar_number_fake", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeString)
+		assertString(t, vec, "", "123456#789")
+	})
 	t.Run("scalar_string", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
 		assertType(t, vec, "", vector.TypeString)
