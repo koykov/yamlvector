@@ -211,6 +211,21 @@ func (vec *Vector) nextToken() (*token, error) {
 		vec.t.setlo(lo).sethi(hi)
 		return &vec.t, nil
 	case unicode.IsDigit(r) || r == '-' || r == '+' || (r == '.' && unicode.IsDigit(r1)):
+		if r == '-' && r1 == '.' {
+			// possible negative infinity
+			r2, _, err2 := vec.ReadRuneAt(int(vec.pos + 1))
+			if err2 == nil && (r2 == 'i' || r2 == 'I') {
+				vec.pos--
+				typ, hi, err2 := vec.readKeyword()
+				if err2 != nil {
+					return nil, err2
+				}
+				vec.t.setlo(vec.pos).sethi(hi)
+				vec.inccp(int(hi - vec.pos))
+				vec.t.typ = typ
+				return &vec.t, nil
+			}
+		}
 		vec.t.typ = tokenNumber
 		hi, nan, err2 := vec.readNumber()
 		if err2 != nil {
