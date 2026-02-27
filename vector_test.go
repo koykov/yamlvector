@@ -87,6 +87,11 @@ func TestScalar(t *testing.T) {
 		assertType(t, vec, "", vector.TypeNumber)
 		assertNumber(t, vec, "", math.Inf(1))
 	})
+	t.Run("scalar_number_Inf", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNumber)
+		assertNumber(t, vec, "", math.Inf(1))
+	})
 	t.Run("scalar_string", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
 		assertType(t, vec, "", vector.TypeString)
