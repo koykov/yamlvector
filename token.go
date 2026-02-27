@@ -21,6 +21,9 @@ const (
 	tokenNumber
 	tokenBool
 	tokenNull
+	tokenInf
+	tokenNInf
+	tokenNaN
 	tokenComment
 	tokenAnchor    // &
 	tokenAlias     // *
@@ -76,6 +79,8 @@ func (tt ttoken) String() string {
 type token struct {
 	typ    ttoken
 	lo, hi uint64
+
+	nan, inf, ninf bool
 }
 
 func (t *token) String() string {

@@ -1,6 +1,7 @@
 package yamlvector
 
 import (
+	"math"
 	"testing"
 
 	"github.com/koykov/vector"
@@ -80,6 +81,11 @@ func TestScalar(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
 		assertType(t, vec, "", vector.TypeString)
 		assertString(t, vec, "", "123456#789")
+	})
+	t.Run("scalar_number_inf", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNumber)
+		assertNumber(t, vec, "", math.Inf(1))
 	})
 	t.Run("scalar_string", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
