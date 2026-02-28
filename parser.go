@@ -54,7 +54,8 @@ func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 		}
 		switch t.typ {
 		case tokenComment:
-			// do nothing
+			node.SetType(vector.TypeNull)
+			return nil
 		case tokenEOF:
 			return nil
 		case tokenDash:
