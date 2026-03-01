@@ -3,6 +3,7 @@ package yamlvector
 import (
 	"bytes"
 	"errors"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -162,6 +163,9 @@ func assertNumber(tb testing.TB, vec *Vector, path string, val float64) {
 	val1, err := vec.Dot(path).Float()
 	if err != nil {
 		tb.Error(err)
+	}
+	if math.IsNaN(val) && math.IsNaN(val1) {
+		return
 	}
 	if val1 != val {
 		tb.Error("value mismatch, need", val, "got", val1)

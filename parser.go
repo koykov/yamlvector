@@ -5,8 +5,10 @@ import (
 	"errors"
 	"io"
 	"unicode"
+	"unsafe"
 
 	"github.com/koykov/bytealg"
+	"github.com/koykov/byteconv"
 	"github.com/koykov/simd/skipline"
 	"github.com/koykov/vector"
 )
@@ -52,7 +54,8 @@ func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 		}
 		switch t.typ {
 		case tokenComment:
-			// do nothing
+			node.SetType(vector.TypeNull)
+			return nil
 		case tokenEOF:
 			return nil
 		case tokenDash:
@@ -64,6 +67,18 @@ func (vec *Vector) parseGeneric(depth int, node *vector.Node) error {
 		case tokenString:
 			node.SetType(vector.TypeString)
 			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(t.hi - t.lo))
+		case tokenNumber:
+			node.SetType(vector.TypeNumber)
+			node.Value().SetAddr(srcp, vec.SrcLen()).SetOffset(int(t.lo)).SetLen(int(t.hi - t.lo))
+		case tokenInf:
+			node.SetType(vector.TypeNumber)
+			node.Value().SetAddr(pbnums, 10).SetOffset(0).SetLen(3)
+		case tokenNInf:
+			node.SetType(vector.TypeNumber)
+			node.Value().SetAddr(pbnums, 10).SetOffset(3).SetLen(4)
+		case tokenNaN:
+			node.SetType(vector.TypeNumber)
+			node.Value().SetAddr(pbnums, 10).SetOffset(7).SetLen(3)
 		case tokenNull:
 			node.SetType(vector.TypeNull)
 		case tokenBool:
@@ -197,13 +212,42 @@ func (vec *Vector) nextToken() (*token, error) {
 		vec.t.setlo(lo).sethi(hi)
 		return &vec.t, nil
 	case unicode.IsDigit(r) || r == '-' || r == '+' || (r == '.' && unicode.IsDigit(r1)):
+		if r == '-' && r1 == '.' {
+			// possible negative infinity
+			r2, _, err2 := vec.ReadRuneAt(int(vec.pos + 1))
+			if err2 == nil && (r2 == 'i' || r2 == 'I') {
+				vec.pos--
+				typ, hi, err2 := vec.readKeyword()
+				if err2 != nil {
+					return nil, err2
+				}
+				vec.t.setlo(vec.pos).sethi(hi)
+				vec.inccp(int(hi - vec.pos))
+				vec.t.typ = typ
+				return &vec.t, nil
+			}
+		}
 		vec.t.typ = tokenNumber
-		hi, err2 := vec.readNumber()
+		hi, nan, err2 := vec.readNumber()
 		if err2 != nil {
 			return nil, err2
 		}
 		vec.t.setlo(vec.pos).sethi(hi)
 		vec.inccp(int(hi - vec.pos))
+		if nan {
+			vec.t.typ = tokenString
+		}
+		return &vec.t, nil
+	case r == '.' && (r1 == 'i' || r1 == 'I' || r1 == 'n' || r1 == 'N'):
+		vec.pos--
+		vec.t.typ = tokenNumber
+		typ, hi, err2 := vec.readKeyword()
+		if err2 != nil {
+			return nil, err2
+		}
+		vec.t.setlo(vec.pos).sethi(hi)
+		vec.inccp(int(hi - vec.pos))
+		vec.t.typ = typ
 		return &vec.t, nil
 	case unicode.IsLetter(r) || r == '~':
 		vec.pos--
@@ -323,9 +367,25 @@ func (vec *Vector) readString(b byte) (uint64, error) {
 	return vec.pos - 1, nil
 }
 
-func (vec *Vector) readNumber() (uint64, error) {
-	// todo implement me
-	return 0, nil
+func (vec *Vector) readNumber() (uint64, bool, error) {
+	p := vec.Src()
+	pl := uint64(len(p))
+	var i uint64
+	vec.pos--
+	for i = vec.pos; i < pl; i++ {
+		if !unicode.IsDigit(rune(p[i])) && p[i] != '.' && p[i] != 'e' && p[i] != 'E' && p[i] != '-' && p[i] != '+' {
+			j := bytealg.IndexByteAtBytes(p, '\n', int(i))
+			if j < 0 {
+				j = int(pl)
+			}
+			i = uint64(j)
+			return i, true, nil
+		}
+	}
+	if i == pl {
+		return pl, false, nil
+	}
+	return i, false, nil
 }
 
 func (vec *Vector) readKeyword() (ttoken, uint64, error) {
@@ -343,6 +403,12 @@ func (vec *Vector) readKeyword() (ttoken, uint64, error) {
 	case bytes.Equal(v, btrue) || bytes.Equal(v, bTrue) || bytes.Equal(v, bTRUE) || bytes.Equal(v, bOn),
 		bytes.Equal(v, bfalse) || bytes.Equal(v, bFalse) || bytes.Equal(v, bFALSE) || bytes.Equal(v, bOff):
 		return tokenBool, vec.pos, nil
+	case bytes.Equal(v, binf) || bytes.Equal(v, bInf) || bytes.Equal(v, bINF):
+		return tokenInf, vec.pos, nil
+	case bytes.Equal(v, bninf) || bytes.Equal(v, bnInf) || bytes.Equal(v, bnINF):
+		return tokenNInf, vec.pos, nil
+	case bytes.Equal(v, bnan) || bytes.Equal(v, bNaN) || bytes.Equal(v, bNAN):
+		return tokenNaN, vec.pos, nil
 	default:
 		return tokenString, vec.pos, nil
 	}
@@ -362,4 +428,21 @@ var (
 	bFALSE = []byte("FALSE")
 	bOn    = []byte("On")
 	bOff   = []byte("Off")
+	binf   = []byte(".inf")
+	bInf   = []byte(".Inf")
+	bINF   = []byte(".INF")
+	bninf  = []byte("-.inf")
+	bnInf  = []byte("-.Inf")
+	bnINF  = []byte("-.INF")
+	bnan   = []byte(".nan")
+	bNaN   = []byte(".NaN")
+	bNAN   = []byte(".NAN")
+
+	bnums  = []byte("Inf-InfNaN")
+	pbnums uintptr
 )
+
+func init() {
+	h := *(*byteconv.SliceHeader)(unsafe.Pointer(&bnums))
+	pbnums = h.Data
+}
