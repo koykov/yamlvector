@@ -309,7 +309,7 @@ var unmarshalTests = []struct {
 	}, {
 		"a: 1",
 		&struct {
-			B int "a"
+			B int `yaml:"a"`
 		}{1},
 	}, {
 		// Some limited backwards compatibility with the 1.1 spec.
@@ -530,7 +530,7 @@ var unmarshalTests = []struct {
 		"a: 1\nb: 2\n",
 		&struct {
 			A int
-			B int "-"
+			B int `yaml:"-"`
 		}{1, 0},
 	},
 
