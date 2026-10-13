@@ -51,7 +51,7 @@ func init() {
 			_ = filepath.Walk(path, func(path1 string, info1 os.FileInfo, err1 error) error {
 				if filepath.Ext(path1) == ".yaml" && !strings.Contains(filepath.Base(path1), ".json") {
 					st := stage{}
-					st.key = strings.Replace(filepath.Base(path1), ".yaml", "", 1)
+					st.key = strings.Replace(path1[len("testdata/"):], ".yaml", "", 1)
 					st.origin, _ = os.ReadFile(path1)
 					if st.json, _ = os.ReadFile(strings.Replace(path1, ".yaml", ".json", 1)); len(st.json) > 0 {
 						st.json = bytealg.Trim(st.json, bNl)
@@ -71,6 +71,15 @@ func init() {
 func getStage(key string) *stage {
 	i, ok := stagesReg[key]
 	if !ok {
+		if pos := strings.IndexByte(key, '/'); pos > 0 {
+			if mstg := getStageMulti(key[:pos]); mstg != nil {
+				for j := 0; j < len(mstg.buf); j++ {
+					if mstg.buf[j].key == key {
+						return &mstg.buf[j]
+					}
+				}
+			}
+		}
 		return nil
 	}
 	return &stages[i]
@@ -175,6 +184,54 @@ func assertNumber(tb testing.TB, vec *Vector, path string, val float64) {
 func assertString(tb testing.TB, vec *Vector, path, val string) {
 	if val1 := vec.Dot(path).String(); val1 != val {
 		tb.Error("value mismatch, need", val, "got", val1)
+	}
+}
+
+func assertNodeType(tb testing.TB, node *vector.Node, typ vector.Type) {
+	if node == nil {
+		tb.Error("nil node")
+		return
+	}
+	if got := node.Type(); got != typ {
+		tb.Errorf("type mismatch, need %d got %d", typ, got)
+	}
+}
+
+func assertNodeString(tb testing.TB, node *vector.Node, val string) {
+	if node == nil {
+		tb.Error("nil node")
+		return
+	}
+	if got := node.String(); got != val {
+		tb.Errorf("value mismatch, need %q got %q", val, got)
+	}
+}
+
+func assertNodeNumber(tb testing.TB, node *vector.Node, val float64) {
+	if node == nil {
+		tb.Error("nil node")
+		return
+	}
+	got, err := node.Float()
+	if err != nil {
+		tb.Error(err)
+		return
+	}
+	if math.IsNaN(val) && math.IsNaN(got) {
+		return
+	}
+	if got != val {
+		tb.Errorf("value mismatch, need %v got %v", val, got)
+	}
+}
+
+func assertNodeLen(tb testing.TB, node *vector.Node, n int) {
+	if node == nil {
+		tb.Error("nil node")
+		return
+	}
+	if got := node.Limit(); got != n {
+		tb.Errorf("length mismatch, need %d got %d", n, got)
 	}
 }
 

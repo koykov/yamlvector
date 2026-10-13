@@ -22,11 +22,9 @@ func (h Helper) Indirect(p *vector.Byteptr) []byte {
 }
 
 func (h Helper) Beautify(w io.Writer, node *vector.Node) error {
-	_, _ = w, node
-	return nil
+	return serialize(w, node, 0, true)
 }
 
 func (h Helper) Marshal(w io.Writer, node *vector.Node) error {
-	_, _ = w, node
-	return nil
+	return serialize(w, node, 0, false)
 }
