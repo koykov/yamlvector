@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"strconv"
 	"unicode"
 	"unicode/utf8"
 	"unsafe"
@@ -763,15 +762,6 @@ func (vec *Vector) lineIndent() int {
 		i++
 	}
 	return c
-}
-
-// isNumeric reports whether b can be parsed as a number.
-func isNumeric(b []byte) bool {
-	if len(b) == 0 {
-		return false
-	}
-	_, err := strconv.ParseFloat(byteconv.B2S(b), 64)
-	return err == nil
 }
 
 var (
