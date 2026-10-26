@@ -5,10 +5,10 @@ go 1.22
 toolchain go1.24.1
 
 require (
-	github.com/koykov/bytealg v1.0.7
+	github.com/koykov/bytealg v1.0.8-0.20260825085744-3d066af81b71
 	github.com/koykov/byteconv v1.0.1
-	github.com/koykov/simd v0.0.13
-	github.com/koykov/vector v1.3.0
+	github.com/koykov/simd v0.0.14
+	github.com/koykov/vector v1.3.1-0.20261004201511-127f0f225ce8
 )
 
 require (
